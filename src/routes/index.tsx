@@ -88,12 +88,11 @@ function Landing() {
               Global coverage from day one
             </div>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              Named detection for Chase, ICICI, HDFC, Wells Fargo — and more on the way
+              Works with any bank's standard PDF statement
             </h2>
             <p className="mt-4 text-muted-foreground">
-              LedgerLocal recognizes these banks by name today. Underneath, a generic parsing
-              engine handles standard statement layouts from any bank in the meantime — so most
-              statements work now, even before we've added their name to this list.
+              Named support for these banks today, with a generic parsing engine handling
+              standard statement layouts from any other bank in the meantime.
             </p>
           </div>
           <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
