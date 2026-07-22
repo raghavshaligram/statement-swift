@@ -5,13 +5,13 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Ledgerly" },
+      { title: "Pricing — LedgerLocal" },
       {
         name: "description",
         content:
-          "One flat price. Unlimited pages. No credits, no per-page fees. Try Ledgerly free without signing up.",
+          "One flat price. Unlimited pages. No credits, no per-page fees. Try LedgerLocal free without signing up.",
       },
-      { property: "og:title", content: "Pricing — Ledgerly" },
+      { property: "og:title", content: "Pricing — LedgerLocal" },
       { property: "og:description", content: "Flat monthly Pro plan. No credits, no page caps." },
     ],
   }),
@@ -67,7 +67,7 @@ function Pricing() {
               <span className="text-sm text-muted-foreground">no signup required</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              For the occasional statement or trying Ledgerly out.
+              For the occasional statement or trying LedgerLocal out.
             </p>
             <Link
               to="/upload"
@@ -94,7 +94,7 @@ function Pricing() {
             <div className="absolute right-6 top-6 rounded-full bg-emerald px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
               Recommended
             </div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald">Ledgerly Pro</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-4xl font-bold">$19</span>
               <span className="text-sm text-background/60">/ month · flat</span>
@@ -132,7 +132,7 @@ function Pricing() {
               <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald" /> No expiry</span>
             </div>
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              Competitors sell you 200-page "credit packs" that expire in 30 days. Ledgerly Pro is
+              Competitors sell you 200-page "credit packs" that expire in 30 days. LedgerLocal Pro is
               flat monthly. Convert 3 pages or 30,000. Same price.
             </p>
           </div>
@@ -145,10 +145,10 @@ function Pricing() {
           <h2 className="text-center text-3xl font-bold tracking-tight text-ink">Common questions</h2>
           <dl className="mt-10 space-y-6">
             {[
-              ["Is my statement really not uploaded?", "Correct. Ledgerly parses PDFs entirely in your browser using WebAssembly. You can verify this in your browser's DevTools Network tab during a conversion — there are zero outbound requests carrying your file."],
+              ["Is my statement really not uploaded?", "Correct. LedgerLocal parses PDFs entirely in your browser using WebAssembly. You can verify this in your browser's DevTools Network tab during a conversion — there are zero outbound requests carrying your file."],
               ["Do I need an account?", "No. You can use Free without signing up. An account is only needed if you want Pro (to attach a subscription)."],
-              ["What if my bank isn't listed?", "Ledgerly's generic parser handles most layouts automatically. If a specific bank isn't producing clean output, request a profile — new banks are added weekly."],
-              ["Can I use it offline?", "Yes. Once the page has loaded once, Ledgerly works fully offline. Great for airports and sensitive audits."],
+              ["What if my bank isn't listed?", "LedgerLocal's generic parser handles most layouts automatically. If a specific bank isn't producing clean output, request a profile — new banks are added weekly."],
+              ["Can I use it offline?", "Yes. Once the page has loaded once, LedgerLocal works fully offline. Great for airports and sensitive audits."],
               ["Team plan?", "Yes — email us. Same flat idea, per-seat billing."],
             ].map(([q, a]) => (
               <div key={q} className="rounded-lg border border-border bg-card p-5">

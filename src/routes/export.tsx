@@ -8,9 +8,9 @@ import { AppShell } from "@/components/app-shell";
 export const Route = createFileRoute("/export")({
   head: () => ({
     meta: [
-      { title: "Export · Ledgerly" },
+      { title: "Export · LedgerLocal" },
       { name: "description", content: "Export to Excel, CSV, Tally XML, OFX, QIF, QBO." },
-      { property: "og:title", content: "Export · Ledgerly" },
+      { property: "og:title", content: "Export · LedgerLocal" },
       { property: "og:description", content: "Six export formats. All generated on your device." },
     ],
   }),

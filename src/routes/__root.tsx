@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ledgerly — Bank Statement to Excel Software" },
+      { title: "LedgerLocal — Bank Statement to Excel Software" },
       {
         name: "description",
         content:
-          "Ledgerly converts PDF bank statements into clean, editable Excel spreadsheets — 100% on-device. Works with Chase, ICICI, HDFC, Wells Fargo, and more.",
+          "LedgerLocal converts PDF bank statements into clean, editable Excel spreadsheets — 100% on-device. Works with Chase, ICICI, HDFC, Wells Fargo, and more.",
       },
-      { name: "author", content: "Ledgerly" },
-      { property: "og:title", content: "Ledgerly — Bank Statement to Excel Software" },
+      { name: "author", content: "LedgerLocal" },
+      { property: "og:title", content: "LedgerLocal — Bank Statement to Excel Software" },
       {
         property: "og:description",
         content: "Convert PDF bank statements to Excel, CSV, Tally, OFX, QIF, QBO. On-device, unlimited pages.",

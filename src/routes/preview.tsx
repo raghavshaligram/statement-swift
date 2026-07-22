@@ -6,9 +6,9 @@ import { AppShell } from "@/components/app-shell";
 export const Route = createFileRoute("/preview")({
   head: () => ({
     meta: [
-      { title: "Preview & edit · Ledgerly" },
+      { title: "Preview & edit · LedgerLocal" },
       { name: "description", content: "Review extracted transactions before export." },
-      { property: "og:title", content: "Preview & edit · Ledgerly" },
+      { property: "og:title", content: "Preview & edit · LedgerLocal" },
       { property: "og:description", content: "Editable transaction table with inline correction." },
     ],
   }),

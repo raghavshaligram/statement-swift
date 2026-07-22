@@ -42,7 +42,7 @@ export function AppShell({
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald text-primary-foreground">
             <FileSpreadsheet className="h-4 w-4" />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight">Ledgerly</span>
+          <span className="text-[15px] font-semibold tracking-tight">LedgerLocal</span>
         </Link>
         <nav className="flex-1 space-y-1 p-3">
           <div className="px-3 pb-2 pt-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">

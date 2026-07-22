@@ -6,9 +6,9 @@ import { AppShell } from "@/components/app-shell";
 export const Route = createFileRoute("/upload")({
   head: () => ({
     meta: [
-      { title: "Convert · Ledgerly" },
+      { title: "Convert · LedgerLocal" },
       { name: "description", content: "Upload PDF bank statements. Processing happens on your device." },
-      { property: "og:title", content: "Convert · Ledgerly" },
+      { property: "og:title", content: "Convert · LedgerLocal" },
       { property: "og:description", content: "On-device PDF to Excel conversion." },
     ],
   }),

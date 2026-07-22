@@ -17,13 +17,13 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ledgerly — Bank Statement to Excel Software" },
+      { title: "LedgerLocal — Bank Statement to Excel Software" },
       {
         name: "description",
         content:
           "Convert PDF bank statements to clean Excel spreadsheets on your device. Unlimited pages. Works with Chase, BofA, Wells Fargo, ICICI, HDFC, SBI, Axis, Kotak and more.",
       },
-      { property: "og:title", content: "Ledgerly — Bank Statement to Excel Software" },
+      { property: "og:title", content: "LedgerLocal — Bank Statement to Excel Software" },
       {
         property: "og:description",
         content: "100% on-device. Unlimited pages. Real software for real accountants.",
@@ -59,7 +59,7 @@ function Landing() {
               <span className="block text-ink/70 sm:mt-2">100% on-device. Unlimited pages.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Ledgerly is desktop-grade software that runs entirely in your browser. Drop in a PDF
+              LedgerLocal is desktop-grade software that runs entirely in your browser. Drop in a PDF
               statement, get a clean editable spreadsheet in seconds. No account. No upload. No
               per-page fees.
             </p>
@@ -84,7 +84,7 @@ function Landing() {
                   </div>
                 </div>
                 <div className="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm font-semibold text-background transition group-hover:bg-ink/90">
-                  Launch Ledgerly
+                  Launch LedgerLocal
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </Link>
@@ -121,7 +121,7 @@ function Landing() {
               Works with Chase, ICICI, HDFC, Wells Fargo — and 400+ more
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Ledgerly ships with parser profiles for major US, Indian, UK and European banks.
+              LedgerLocal ships with parser profiles for major US, Indian, UK and European banks.
               Custom layouts? The generic engine handles those too.
             </p>
           </div>
@@ -157,7 +157,7 @@ function Landing() {
               n={1}
               icon={FileText}
               title="Drop your statements"
-              body="Drag one or many PDF statements into Ledgerly. Multi-account bundles are handled automatically."
+              body="Drag one or many PDF statements into LedgerLocal. Multi-account bundles are handled automatically."
             />
             <StepCard
               n={2}
@@ -187,7 +187,7 @@ function Landing() {
             </h2>
             <p className="mt-4 text-base leading-relaxed text-background/70">
               Competing "converters" upload your PDF to their servers, parse it there, then email
-              you the result. Ledgerly parses everything locally using WebAssembly — the file never
+              you the result. LedgerLocal parses everything locally using WebAssembly — the file never
               touches the network. You can literally unplug your ethernet cable mid-conversion.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
@@ -207,13 +207,13 @@ function Landing() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <div className="rounded-lg border border-white/10 bg-black/40 p-4 font-mono text-xs text-emerald/90">
               <div className="mb-2 text-background/40">// network activity during conversion</div>
-              <div>[ledgerly] loading pdf.wasm ................. ok</div>
-              <div>[ledgerly] parsing hdfc-statement-oct.pdf</div>
-              <div>[ledgerly] page 1 → 14 transactions</div>
-              <div>[ledgerly] page 2 → 22 transactions</div>
-              <div>[ledgerly] ...</div>
-              <div className="mt-2 text-emerald">[ledgerly] uploads to server: 0</div>
-              <div className="text-emerald">[ledgerly] pdf leaves device: never</div>
+              <div>[ledgerlocal] loading pdf.wasm ................. ok</div>
+              <div>[ledgerlocal] parsing hdfc-statement-oct.pdf</div>
+              <div>[ledgerlocal] page 1 → 14 transactions</div>
+              <div>[ledgerlocal] page 2 → 22 transactions</div>
+              <div>[ledgerlocal] ...</div>
+              <div className="mt-2 text-emerald">[ledgerlocal] uploads to server: 0</div>
+              <div className="text-emerald">[ledgerlocal] pdf leaves device: never</div>
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs text-background/60">
               <Lock className="h-3.5 w-3.5" />
