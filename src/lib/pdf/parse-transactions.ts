@@ -53,6 +53,22 @@ const DATE_PATTERNS: Array<{ re: RegExp; toIso: (m: RegExpMatchArray) => string 
       return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     },
   },
+  {
+    // DD-MM-YYYY or MM-DD-YYYY — numeric, dash-separated. Extremely common in
+    // Indian bank statements (e.g. ICICI: "03-04-2025"). Same day/month
+    // disambiguation heuristic as the slash-separated pattern above. This is
+    // distinct from the DD-Mon-YYYY pattern earlier, which requires a month name.
+    re: /\b(\d{1,2})-(\d{1,2})-(\d{4})\b/,
+    toIso: (m) => {
+      const [, a, b, year] = m;
+      const first = parseInt(a, 10);
+      const second = parseInt(b, 10);
+      const month = first > 12 ? second : first;
+      const day = first > 12 ? first : second;
+      if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    },
+  },
 ];
 
 const MONTHS: Record<string, string> = {
