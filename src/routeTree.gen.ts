@@ -10,7 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BankStatementToOfxRouteImport } from './routes/bank-statement-to-ofx'
+import { Route as BankStatementToQifRouteImport } from './routes/bank-statement-to-qif'
+import { Route as BankStatementToTallyRouteImport } from './routes/bank-statement-to-tally'
+import { Route as ChaseBankStatementToExcelRouteImport } from './routes/chase-bank-statement-to-excel'
 import { Route as ExportRouteImport } from './routes/export'
+import { Route as IciciBankStatementToExcelRouteImport } from './routes/icici-bank-statement-to-excel'
 import { Route as PreviewRouteImport } from './routes/preview'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -21,11 +26,38 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BankStatementToOfxRoute = BankStatementToOfxRouteImport.update({
+  id: '/bank-statement-to-ofx',
+  path: '/bank-statement-to-ofx',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankStatementToQifRoute = BankStatementToQifRouteImport.update({
+  id: '/bank-statement-to-qif',
+  path: '/bank-statement-to-qif',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankStatementToTallyRoute = BankStatementToTallyRouteImport.update({
+  id: '/bank-statement-to-tally',
+  path: '/bank-statement-to-tally',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChaseBankStatementToExcelRoute =
+  ChaseBankStatementToExcelRouteImport.update({
+    id: '/chase-bank-statement-to-excel',
+    path: '/chase-bank-statement-to-excel',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ExportRoute = ExportRouteImport.update({
   id: '/export',
   path: '/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IciciBankStatementToExcelRoute =
+  IciciBankStatementToExcelRouteImport.update({
+    id: '/icici-bank-statement-to-excel',
+    path: '/icici-bank-statement-to-excel',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PreviewRoute = PreviewRouteImport.update({
   id: '/preview',
   path: '/preview',
@@ -49,7 +81,12 @@ const UploadRoute = UploadRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bank-statement-to-ofx': typeof BankStatementToOfxRoute
+  '/bank-statement-to-qif': typeof BankStatementToQifRoute
+  '/bank-statement-to-tally': typeof BankStatementToTallyRoute
+  '/chase-bank-statement-to-excel': typeof ChaseBankStatementToExcelRoute
   '/export': typeof ExportRoute
+  '/icici-bank-statement-to-excel': typeof IciciBankStatementToExcelRoute
   '/preview': typeof PreviewRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -57,7 +94,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bank-statement-to-ofx': typeof BankStatementToOfxRoute
+  '/bank-statement-to-qif': typeof BankStatementToQifRoute
+  '/bank-statement-to-tally': typeof BankStatementToTallyRoute
+  '/chase-bank-statement-to-excel': typeof ChaseBankStatementToExcelRoute
   '/export': typeof ExportRoute
+  '/icici-bank-statement-to-excel': typeof IciciBankStatementToExcelRoute
   '/preview': typeof PreviewRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -66,7 +108,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bank-statement-to-ofx': typeof BankStatementToOfxRoute
+  '/bank-statement-to-qif': typeof BankStatementToQifRoute
+  '/bank-statement-to-tally': typeof BankStatementToTallyRoute
+  '/chase-bank-statement-to-excel': typeof ChaseBankStatementToExcelRoute
   '/export': typeof ExportRoute
+  '/icici-bank-statement-to-excel': typeof IciciBankStatementToExcelRoute
   '/preview': typeof PreviewRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -75,13 +122,39 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/export' | '/preview' | '/pricing' | '/sitemap.xml' | '/upload'
+    | '/'
+    | '/bank-statement-to-ofx'
+    | '/bank-statement-to-qif'
+    | '/bank-statement-to-tally'
+    | '/chase-bank-statement-to-excel'
+    | '/export'
+    | '/icici-bank-statement-to-excel'
+    | '/preview'
+    | '/pricing'
+    | '/sitemap.xml'
+    | '/upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/export' | '/preview' | '/pricing' | '/sitemap.xml' | '/upload'
+  to:
+    | '/'
+    | '/bank-statement-to-ofx'
+    | '/bank-statement-to-qif'
+    | '/bank-statement-to-tally'
+    | '/chase-bank-statement-to-excel'
+    | '/export'
+    | '/icici-bank-statement-to-excel'
+    | '/preview'
+    | '/pricing'
+    | '/sitemap.xml'
+    | '/upload'
   id:
     | '__root__'
     | '/'
+    | '/bank-statement-to-ofx'
+    | '/bank-statement-to-qif'
+    | '/bank-statement-to-tally'
+    | '/chase-bank-statement-to-excel'
     | '/export'
+    | '/icici-bank-statement-to-excel'
     | '/preview'
     | '/pricing'
     | '/sitemap.xml'
@@ -90,7 +163,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BankStatementToOfxRoute: typeof BankStatementToOfxRoute
+  BankStatementToQifRoute: typeof BankStatementToQifRoute
+  BankStatementToTallyRoute: typeof BankStatementToTallyRoute
+  ChaseBankStatementToExcelRoute: typeof ChaseBankStatementToExcelRoute
   ExportRoute: typeof ExportRoute
+  IciciBankStatementToExcelRoute: typeof IciciBankStatementToExcelRoute
   PreviewRoute: typeof PreviewRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -106,11 +184,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bank-statement-to-ofx': {
+      id: '/bank-statement-to-ofx'
+      path: '/bank-statement-to-ofx'
+      fullPath: '/bank-statement-to-ofx'
+      preLoaderRoute: typeof BankStatementToOfxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-statement-to-qif': {
+      id: '/bank-statement-to-qif'
+      path: '/bank-statement-to-qif'
+      fullPath: '/bank-statement-to-qif'
+      preLoaderRoute: typeof BankStatementToQifRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-statement-to-tally': {
+      id: '/bank-statement-to-tally'
+      path: '/bank-statement-to-tally'
+      fullPath: '/bank-statement-to-tally'
+      preLoaderRoute: typeof BankStatementToTallyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chase-bank-statement-to-excel': {
+      id: '/chase-bank-statement-to-excel'
+      path: '/chase-bank-statement-to-excel'
+      fullPath: '/chase-bank-statement-to-excel'
+      preLoaderRoute: typeof ChaseBankStatementToExcelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/export': {
       id: '/export'
       path: '/export'
       fullPath: '/export'
       preLoaderRoute: typeof ExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/icici-bank-statement-to-excel': {
+      id: '/icici-bank-statement-to-excel'
+      path: '/icici-bank-statement-to-excel'
+      fullPath: '/icici-bank-statement-to-excel'
+      preLoaderRoute: typeof IciciBankStatementToExcelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/preview': {
@@ -146,7 +259,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BankStatementToOfxRoute: BankStatementToOfxRoute,
+  BankStatementToQifRoute: BankStatementToQifRoute,
+  BankStatementToTallyRoute: BankStatementToTallyRoute,
+  ChaseBankStatementToExcelRoute: ChaseBankStatementToExcelRoute,
   ExportRoute: ExportRoute,
+  IciciBankStatementToExcelRoute: IciciBankStatementToExcelRoute,
   PreviewRoute: PreviewRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

@@ -79,6 +79,22 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
+
+      {/* Internal linking block — SEO landing pages. Stub "coming soon" routes
+          for now; swap in real guides as they're written. */}
+      <div className="border-t border-border/60">
+        <div className="mx-auto max-w-7xl px-6 py-8 text-sm text-muted-foreground">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink">Popular conversions</div>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+            <li><Link to="/bank-statement-to-tally" className="hover:text-ink">Bank statement to Tally</Link></li>
+            <li><Link to="/bank-statement-to-ofx" className="hover:text-ink">Bank statement to OFX</Link></li>
+            <li><Link to="/bank-statement-to-qif" className="hover:text-ink">Bank statement to QIF</Link></li>
+            <li><Link to="/chase-bank-statement-to-excel" className="hover:text-ink">Chase statement to Excel</Link></li>
+            <li><Link to="/icici-bank-statement-to-excel" className="hover:text-ink">ICICI statement to Excel</Link></li>
+          </ul>
+        </div>
+      </div>
+
       <div className="border-t border-border/60 px-6 py-4 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} LedgerLocal. Your statements never leave your device.
       </div>

@@ -5,12 +5,16 @@ import {
   Infinity as InfinityIcon,
   Check,
   Upload,
+  ArrowRight,
 } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/scroll-reveal";
 import { HeroDemo } from "@/components/hero-demo";
 import { TransactionSideBySide } from "@/components/transaction-side-by-side";
 import { DropVisual, ParseVisual, ExportVisual } from "@/components/how-it-works-icons";
+import { CapabilityGrid } from "@/components/capability-grid";
+import { ComparisonSection } from "@/components/comparison-section";
+import { HomepageFaq } from "@/components/homepage-faq";
 import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/")({
@@ -44,7 +48,7 @@ function Landing() {
       <SiteHeader />
 
       {/* HERO — live in-browser demo, two columns on desktop */}
-      <section className="relative overflow-hidden border-b border-border">
+      <section id="converter" className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 grid-fintech opacity-60" aria-hidden />
         <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-emerald-soft/40 to-transparent" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 lg:pt-24">
@@ -150,6 +154,30 @@ function Landing() {
       {/* REVIEW EVERY TRANSACTION, SIDE BY SIDE */}
       <TransactionSideBySide />
 
+      {/* STATS BAR */}
+      <section className="border-b border-border py-14">
+        <div className="mx-auto max-w-7xl px-6">
+          <ScrollRevealGroup className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            {[
+              ["6", "Export formats"],
+              ["0", "Bytes uploaded to any server, ever"],
+              ["6+", "Countries with bank support"],
+              ["∞", "Pages per conversion, no caps on Pro"],
+            ].map(([stat, label]) => (
+              <ScrollRevealItem key={label}>
+                <div className="text-center">
+                  <div className="font-mono text-4xl font-bold text-emerald sm:text-5xl">{stat}</div>
+                  <div className="mt-2 text-xs text-muted-foreground sm:text-sm">{label}</div>
+                </div>
+              </ScrollRevealItem>
+            ))}
+          </ScrollRevealGroup>
+        </div>
+      </section>
+
+      {/* CAPABILITY GRID */}
+      <CapabilityGrid />
+
       {/* SECURITY */}
       <section id="security" className="border-b border-border bg-ink py-20 text-background">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
@@ -197,6 +225,87 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      {/* MANUAL ENTRY VS LEDGERLOCAL */}
+      <ComparisonSection />
+
+      {/* ACCOUNTING-STACK LOGOS */}
+      <section className="border-b border-border py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Exports straight into the tools you already use
+          </div>
+          <ScrollRevealGroup className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-3">
+            {[
+              // TODO: link to /guides/quickbooks-import once written
+              "QuickBooks",
+              // TODO: link to /guides/tally-import once written
+              "Tally",
+              // TODO: link to /guides/xero-import once written
+              "Xero",
+              // TODO: link to /guides/google-sheets-import once written
+              "Google Sheets",
+            ].map((name) => (
+              <ScrollRevealItem key={name}>
+                <Link
+                  to="/upload"
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-6 py-3 text-sm font-semibold text-ink/80 transition hover:border-emerald/40 hover:text-ink"
+                >
+                  {name}
+                </Link>
+              </ScrollRevealItem>
+            ))}
+          </ScrollRevealGroup>
+        </div>
+      </section>
+
+      {/* PRICING TEASER */}
+      <section className="border-b border-border bg-surface-muted/40 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <ScrollReveal className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              Simple, flat pricing
+            </h2>
+          </ScrollReveal>
+          <ScrollRevealGroup className="mt-10 grid gap-5 sm:grid-cols-2">
+            <ScrollRevealItem>
+              <div className="rounded-xl border border-border bg-card p-6">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-ink">$0</span>
+                  <span className="text-sm text-muted-foreground">no signup required</span>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  A handful of conversions a month, up to 20 pages per statement. Excel and CSV export.
+                </p>
+              </div>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="rounded-xl border-2 border-emerald bg-ink p-6 text-background">
+                <div className="text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">$19</span>
+                  <span className="text-sm text-background/60">/ month · flat</span>
+                </div>
+                <p className="mt-3 text-sm text-background/70">
+                  Unlimited conversions, unlimited pages, all six export formats. No credits, no per-page fees.
+                </p>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealGroup>
+          <div className="mt-8 text-center">
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald hover:underline"
+            >
+              See full pricing <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <HomepageFaq />
 
       {/* CTA */}
       <section className="border-b border-border py-20">
