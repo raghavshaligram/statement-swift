@@ -68,24 +68,29 @@ export function TransactionSideBySide() {
               <div className="border-b border-border bg-surface-muted/60 px-5 py-3 font-mono text-xs text-muted-foreground">
                 FIRST NATIONAL BANK · Statement of Account · Feb 1 – Feb 28
               </div>
-              <ScrollRevealGroup className="space-y-1 p-5">
-                {RAW_LINES.map((line, i) => (
-                  <ScrollRevealItem key={i}>
-                    <div
-                      onMouseEnter={() => setHovered(i)}
-                      onMouseLeave={() => setHovered(null)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg border px-3 py-2 font-mono text-[13px] leading-relaxed transition-colors",
-                        rowClass(hovered === i, "left"),
-                        hovered === i ? "text-ink" : "text-muted-foreground"
-                      )}
-                    >
-                      <span className={chipClass(hovered === i)}>{i + 1}</span>
-                      <span className="whitespace-pre">{line}</span>
-                    </div>
-                  </ScrollRevealItem>
-                ))}
-              </ScrollRevealGroup>
+              <div className="overflow-x-auto">
+                <ScrollRevealGroup className="min-w-max space-y-1 p-5">
+                  {RAW_LINES.map((line, i) => (
+                    <ScrollRevealItem key={i}>
+                      <div
+                        onMouseEnter={() => setHovered(i)}
+                        onMouseLeave={() => setHovered(null)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg border px-3 py-2 font-mono text-[12px] leading-relaxed transition-colors sm:text-[13px]",
+                          rowClass(hovered === i, "left"),
+                          hovered === i ? "text-ink" : "text-muted-foreground"
+                        )}
+                      >
+                        <span className={chipClass(hovered === i)}>{i + 1}</span>
+                        <span className="whitespace-pre">{line}</span>
+                      </div>
+                    </ScrollRevealItem>
+                  ))}
+                </ScrollRevealGroup>
+              </div>
+              <div className="px-5 pb-3 text-[10px] text-muted-foreground/70 sm:hidden">
+                Swipe to see full line →
+              </div>
             </div>
 
             {/* Right: extracted transactions */}
