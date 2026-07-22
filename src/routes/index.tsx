@@ -119,7 +119,7 @@ function Landing() {
             </h2>
           </ScrollReveal>
           <ScrollRevealGroup className="mt-14 grid gap-6 lg:grid-cols-3">
-            <ScrollRevealItem>
+            <ScrollRevealItem className="h-full">
               <StepCard
                 n={1}
                 visual={<DropVisual />}
@@ -127,7 +127,7 @@ function Landing() {
                 body="Drag one or many PDF statements into LedgerLocal. Multi-account bundles are handled automatically."
               />
             </ScrollRevealItem>
-            <ScrollRevealItem>
+            <ScrollRevealItem className="h-full">
               <StepCard
                 n={2}
                 visual={<ParseVisual />}
@@ -135,7 +135,7 @@ function Landing() {
                 body="Every page is read and matched locally in your browser with a deterministic layout parser — nothing is sent to a server, ever."
               />
             </ScrollRevealItem>
-            <ScrollRevealItem>
+            <ScrollRevealItem className="h-full">
               <StepCard
                 n={3}
                 visual={<ExportVisual />}
@@ -243,7 +243,7 @@ function StepCard({
   n, visual, title, body,
 }: { n: number; visual: ReactNode; title: string; body: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="flex h-full flex-col rounded-xl border border-border bg-card p-6">
       <div className="flex items-center gap-3">
         {visual}
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
