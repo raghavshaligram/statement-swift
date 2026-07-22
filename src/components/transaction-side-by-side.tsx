@@ -47,6 +47,15 @@ function chipClass(active: boolean) {
 export function TransactionSideBySide() {
   const [hovered, setHovered] = useState<number | null>(null);
 
+  // Touchscreens have no hover state, so the sync-highlight interaction this
+  // section is built around (and describes in its own copy: "Hover a row...")
+  // would silently do nothing on mobile without this. Tapping a row toggles
+  // the same highlight state hover gives on desktop; tapping the active row
+  // again clears it.
+  function toggleTap(i: number) {
+    setHovered((current) => (current === i ? null : i));
+  }
+
   return (
     <section className="border-b border-border bg-surface-muted/30 py-20">
       <div className="mx-auto max-w-7xl px-6">
@@ -57,7 +66,7 @@ export function TransactionSideBySide() {
           </h2>
           <p className="mt-4 text-muted-foreground">
             Every row in your spreadsheet traces back to a line in the original statement — nothing is a
-            black box. Hover a row on either side to see it match.
+            black box. Hover or tap a row on either side to see it match.
           </p>
         </ScrollReveal>
 
@@ -75,8 +84,9 @@ export function TransactionSideBySide() {
                       <div
                         onMouseEnter={() => setHovered(i)}
                         onMouseLeave={() => setHovered(null)}
+                        onClick={() => toggleTap(i)}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg border px-3 py-2 font-mono text-[12px] leading-relaxed transition-colors sm:text-[13px]",
+                          "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 font-mono text-[12px] leading-relaxed transition-colors sm:text-[13px]",
                           rowClass(hovered === i, "left"),
                           hovered === i ? "text-ink" : "text-muted-foreground"
                         )}
@@ -107,8 +117,9 @@ export function TransactionSideBySide() {
                     <div
                       onMouseEnter={() => setHovered(i)}
                       onMouseLeave={() => setHovered(null)}
+                      onClick={() => toggleTap(i)}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors",
+                        "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors",
                         rowClass(hovered === i, "right")
                       )}
                     >

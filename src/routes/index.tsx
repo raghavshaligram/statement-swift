@@ -15,6 +15,7 @@ import { DropVisual, ParseVisual, ExportVisual } from "@/components/how-it-works
 import { CapabilityGrid } from "@/components/capability-grid";
 import { ComparisonSection } from "@/components/comparison-section";
 import { HomepageFaq } from "@/components/homepage-faq";
+import { BANK_LABELS } from "@/lib/pdf/bank-detection";
 import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/")({
@@ -36,11 +37,10 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const banks = [
-  "Chase", "Bank of America", "Wells Fargo", "Citi", "Capital One",
-  "ICICI", "HDFC", "SBI", "Axis", "Kotak", "Yes Bank", "IDFC First",
-  "Barclays", "HSBC", "Santander", "RBC",
-];
+// Source of truth: only banks with real text-signature detection in
+// bank-detection.ts. Do not add banks here that aren't actually detected —
+// this list is what the homepage claims support for, so it must match reality.
+const banks = Object.values(BANK_LABELS).filter((label) => !label.startsWith("Unrecognized"));
 
 function Landing() {
   return (
@@ -88,14 +88,15 @@ function Landing() {
               Global coverage from day one
             </div>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              Works with Chase, ICICI, HDFC, Wells Fargo — and 400+ more
+              Named detection for Chase, ICICI, HDFC, Wells Fargo — and more on the way
             </h2>
             <p className="mt-4 text-muted-foreground">
-              LedgerLocal ships with parser profiles for major US, Indian, UK and European banks.
-              Custom layouts? The generic engine handles those too.
+              LedgerLocal recognizes these banks by name today. Underneath, a generic parsing
+              engine handles standard statement layouts from any bank in the meantime — so most
+              statements work now, even before we've added their name to this list.
             </p>
           </div>
-          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
             {banks.map((b) => (
               <div
                 key={b}
@@ -107,7 +108,10 @@ function Landing() {
           </div>
           <div className="mt-6 text-center text-xs text-muted-foreground">
             Don't see yours?{" "}
-            <a href="#" className="font-medium text-emerald hover:underline">
+            <a
+              href="mailto:support@ledgerlocal.com?subject=Bank%20profile%20request"
+              className="font-medium text-emerald hover:underline"
+            >
               Request a bank profile →
             </a>
           </div>
