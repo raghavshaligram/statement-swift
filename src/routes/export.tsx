@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   FileSpreadsheet, FileText, FileCode, FileType, Check, ShieldCheck, Download, ArrowLeft,
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { useStatementStore } from "@/lib/statement-store";
+import { runExport, DEFAULT_EXPORT_OPTIONS, type ExportFormat, type ExportOptions } from "@/lib/export";
 
 export const Route = createFileRoute("/export")({
   head: () => ({
@@ -17,18 +19,44 @@ export const Route = createFileRoute("/export")({
   component: ExportPage,
 });
 
-const FORMATS = [
-  { key: "xlsx", name: "Excel", ext: ".xlsx", icon: FileSpreadsheet, desc: "Native Microsoft Excel workbook with formatted columns.", tone: "emerald", ready: true },
-  { key: "csv",  name: "CSV",   ext: ".csv",  icon: FileText,        desc: "Universal comma-separated. Opens in anything.",       tone: "slate",  ready: true },
-  { key: "tally", name: "Tally XML", ext: ".xml", icon: FileCode,    desc: "Direct import into Tally Prime / ERP 9 daybook.",     tone: "slate", ready: false },
-  { key: "ofx", name: "OFX",   ext: ".ofx",  icon: FileType,        desc: "Open Financial Exchange — Quicken, Money.",           tone: "slate", ready: false },
-  { key: "qif", name: "QIF",   ext: ".qif",  icon: FileType,        desc: "Legacy Quicken import format.",                       tone: "slate", ready: false },
-  { key: "qbo", name: "QBO",   ext: ".qbo",  icon: FileType,        desc: "QuickBooks Web Connect — imports as a bank feed.",    tone: "slate", ready: false },
+const FORMATS: Array<{
+  key: ExportFormat; name: string; ext: string; icon: typeof FileSpreadsheet; desc: string; tone: string;
+}> = [
+  { key: "xlsx", name: "Excel", ext: ".xlsx", icon: FileSpreadsheet, desc: "Native Microsoft Excel workbook with formatted columns.", tone: "emerald" },
+  { key: "csv",  name: "CSV",   ext: ".csv",  icon: FileText,        desc: "Universal comma-separated. Opens in anything.",       tone: "slate" },
+  { key: "tally", name: "Tally XML", ext: ".xml", icon: FileCode,    desc: "Direct import into Tally Prime / ERP 9 daybook.",     tone: "slate" },
+  { key: "ofx", name: "OFX",   ext: ".ofx",  icon: FileType,        desc: "Open Financial Exchange — Quicken, Money.",           tone: "slate" },
+  { key: "qif", name: "QIF",   ext: ".qif",  icon: FileType,        desc: "Legacy Quicken import format.",                       tone: "slate" },
+  { key: "qbo", name: "QBO",   ext: ".qbo",  icon: FileType,        desc: "QuickBooks Web Connect — imports as a bank feed.",    tone: "slate" },
 ];
 
 function ExportPage() {
-  const [selected, setSelected] = useState<string>("xlsx");
+  const nav = useNavigate();
+  const statements = useStatementStore((s) => s.statements);
+  const rows = useMemo(() => statements.flatMap((st) => st.transactions), [statements]);
+
+  useEffect(() => {
+    if (statements.length === 0) nav({ to: "/upload" });
+  }, [statements.length, nav]);
+
+  const [selected, setSelected] = useState<ExportFormat>("xlsx");
   const [downloaded, setDownloaded] = useState<Record<string, boolean>>({});
+  const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
+  const [oneSheetPerStatement, setOneSheetPerStatement] = useState(true);
+
+  const baseFileName = useMemo(() => {
+    const first = statements[0]?.fileName?.replace(/\.pdf$/i, "");
+    return statements.length > 1 ? `${first}-and-${statements.length - 1}-more` : first || "statement";
+  }, [statements]);
+
+  const estimatedSizeKb = Math.max(1, Math.round((rows.length * 60) / 1024));
+
+  function handleDownload() {
+    runExport(selected, rows, baseFileName, options, oneSheetPerStatement);
+    setDownloaded((s) => ({ ...s, [selected]: true }));
+  }
+
+  if (statements.length === 0) return null;
 
   return (
     <AppShell
@@ -74,11 +102,6 @@ function ExportPage() {
                     }`}>
                       <f.icon className="h-5 w-5" />
                     </div>
-                    {!f.ready && (
-                      <span className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Beta
-                      </span>
-                    )}
                     {active && (
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald text-primary-foreground">
                         <Check className="h-3 w-3" />
@@ -101,11 +124,31 @@ function ExportPage() {
           <div className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
             <div className="text-sm font-semibold text-ink">Export options</div>
             <div className="mt-4 space-y-3 text-sm">
-              <Toggle label="Include running balance column" defaultChecked />
-              <Toggle label="Split debit / credit into separate columns" />
-              <Toggle label="Normalize dates to ISO (YYYY-MM-DD)" defaultChecked />
-              <Toggle label="Include source-page reference column" />
-              <Toggle label="One sheet per statement (Excel only)" defaultChecked />
+              <Toggle
+                label="Include running balance column"
+                checked={options.includeBalance}
+                onChange={(v) => setOptions((o) => ({ ...o, includeBalance: v }))}
+              />
+              <Toggle
+                label="Split debit / credit into separate columns"
+                checked={options.splitDebitCredit}
+                onChange={(v) => setOptions((o) => ({ ...o, splitDebitCredit: v }))}
+              />
+              <Toggle
+                label="Normalize dates to ISO (YYYY-MM-DD)"
+                checked={options.normalizeDatesIso}
+                onChange={(v) => setOptions((o) => ({ ...o, normalizeDatesIso: v }))}
+              />
+              <Toggle
+                label="Include source-page reference column"
+                checked={options.includeSourcePage}
+                onChange={(v) => setOptions((o) => ({ ...o, includeSourcePage: v }))}
+              />
+              <Toggle
+                label="One sheet per statement (Excel only)"
+                checked={oneSheetPerStatement}
+                onChange={setOneSheetPerStatement}
+              />
             </div>
           </div>
 
@@ -114,13 +157,13 @@ function ExportPage() {
               Ready to export
             </div>
             <div className="mt-2 text-lg font-semibold">
-              statements-jun-2025{FORMATS.find((f) => f.key === selected)?.ext}
+              {baseFileName}{FORMATS.find((f) => f.key === selected)?.ext}
             </div>
             <div className="mt-1 text-xs text-background/60">
-              20 transactions · 1 statement · ~12 KB
+              {rows.length} transactions · {statements.length} statement{statements.length > 1 ? "s" : ""} · ~{estimatedSizeKb} KB
             </div>
             <button
-              onClick={() => setDownloaded((s) => ({ ...s, [selected]: true }))}
+              onClick={handleDownload}
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-emerald/90"
             >
               <Download className="h-4 w-4" />
@@ -145,18 +188,17 @@ function ExportPage() {
   );
 }
 
-function Toggle({ label, defaultChecked }: { label: string; defaultChecked?: boolean }) {
-  const [on, setOn] = useState(!!defaultChecked);
+function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center justify-between rounded-md border border-border bg-surface-muted/40 px-3 py-2">
       <span className="text-ink">{label}</span>
       <button
         type="button"
-        onClick={() => setOn(!on)}
-        className={`relative h-5 w-9 rounded-full transition ${on ? "bg-emerald" : "bg-border"}`}
-        aria-pressed={on}
+        onClick={() => onChange(!checked)}
+        className={`relative h-5 w-9 rounded-full transition ${checked ? "bg-emerald" : "bg-border"}`}
+        aria-pressed={checked}
       >
-        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-background shadow transition ${on ? "left-4" : "left-0.5"}`} />
+        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-background shadow transition ${checked ? "left-4" : "left-0.5"}`} />
       </button>
     </label>
   );

@@ -1,0 +1,89 @@
+/**
+ * Client-side PDF text extraction using pdf.js. This must only ever run in the
+ * browser (never during SSR) — callers are responsible for checking
+ * `typeof window !== "undefined"` before invoking anything here, and this
+ * module lazy-loads pdf.js itself to avoid pulling it into the SSR bundle.
+ */
+
+export type TextItem = {
+  str: string;
+  x: number;
+  y: number; // pdf.js gives y from the bottom of the page; we keep it as-is and sort descending
+  width: number;
+  height: number;
+};
+
+export type PageText = {
+  pageNumber: number;
+  items: TextItem[];
+  rawText: string;
+};
+
+export type ExtractedPdf = {
+  pageCount: number;
+  pages: PageText[];
+  fullText: string;
+};
+
+let pdfjsLibPromise: Promise<typeof import("pdfjs-dist")> | null = null;
+
+async function loadPdfJs() {
+  if (!pdfjsLibPromise) {
+    pdfjsLibPromise = import("pdfjs-dist").then(async (lib) => {
+      // Worker must be served from a URL pdf.js can fetch at runtime.
+      const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+      lib.GlobalWorkerOptions.workerSrc = workerUrl;
+      return lib;
+    });
+  }
+  return pdfjsLibPromise;
+}
+
+export async function extractPdfText(
+  file: File,
+  onPageParsed?: (pageNumber: number, totalPages: number) => void
+): Promise<ExtractedPdf> {
+  if (typeof window === "undefined") {
+    throw new Error("extractPdfText can only run in the browser");
+  }
+
+  const pdfjsLib = await loadPdfJs();
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const doc = await loadingTask.promise;
+
+  const pages: PageText[] = [];
+  let fullText = "";
+
+  for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber++) {
+    const page = await doc.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1 });
+    const content = await page.getTextContent();
+
+    const items: TextItem[] = content.items
+      // pdf.js types these loosely; filter out marked-content/no-str items defensively
+      .filter((it: any) => typeof it.str === "string" && it.str.trim().length > 0)
+      .map((it: any) => {
+        const [, , , , x, y] = it.transform;
+        return {
+          str: it.str as string,
+          x: x as number,
+          // Flip y so that 0 is the top of the page, ascending downward — much easier
+          // to reason about when reconstructing rows top-to-bottom.
+          y: viewport.height - (y as number),
+          width: it.width as number,
+          height: it.height as number,
+        };
+      });
+
+    const rawText = items.map((i) => i.str).join(" ");
+    pages.push({ pageNumber, items, rawText });
+    fullText += rawText + "\n";
+
+    onPageParsed?.(pageNumber, doc.numPages);
+    // release the page's resources; pdf.js keeps things around otherwise on big docs
+    page.cleanup();
+  }
+
+  return { pageCount: doc.numPages, pages, fullText };
+}
