@@ -1,18 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ShieldCheck,
-  Upload,
-  FileSpreadsheet,
-  Zap,
   Lock,
   Infinity as InfinityIcon,
   Check,
-  ArrowRight,
-  FileText,
-  Table2,
-  Download,
+  Upload,
 } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
+import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/scroll-reveal";
+import { HeroDemo } from "@/components/hero-demo";
+import { TransactionSideBySide } from "@/components/transaction-side-by-side";
+import { DropVisual, ParseVisual, ExportVisual } from "@/components/how-it-works-icons";
+import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,68 +43,35 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* HERO */}
+      {/* HERO — live in-browser demo, two columns on desktop */}
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 grid-fintech opacity-60" aria-hidden />
         <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-emerald-soft/40 to-transparent" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 lg:pt-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald" />
-              Now supporting 400+ banks across US, India, UK & EU
-            </div>
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
-              Bank statement to Excel <span className="text-emerald">software</span>
-              <span className="block text-ink/70 sm:mt-2">100% on-device. Unlimited pages.</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              LedgerLocal is desktop-grade software that runs entirely in your browser. Drop in a PDF
-              statement, get a clean editable spreadsheet in seconds. No account. No upload. No
-              per-page fees.
-            </p>
-          </div>
-
-          {/* Upload panel */}
-          <div className="mx-auto mt-12 max-w-3xl">
-            <div className="rounded-2xl border border-border bg-card p-2 shadow-xl shadow-slate-900/5">
-              <Link
-                to="/upload"
-                className="group relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-emerald/40 bg-emerald-soft/30 px-8 py-14 transition hover:border-emerald hover:bg-emerald-soft/60"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-background shadow-sm">
-                  <Upload className="h-6 w-6 text-emerald" />
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-ink">
-                    Drop PDF statements here
-                  </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    or click to browse — multi-file supported · up to 500 pages each
-                  </div>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm font-semibold text-background transition group-hover:bg-ink/90">
-                  Launch LedgerLocal
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </Link>
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 py-3 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5 font-medium text-emerald">
-                  <Lock className="h-3.5 w-3.5" /> Processed on your device — nothing uploaded, ever
-                </span>
-                <span>·</span>
-                <span>No signup to try</span>
-                <span>·</span>
-                <span>Works offline once loaded</span>
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <ScrollReveal>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+                <Lock className="h-3 w-3 text-emerald" />
+                100% on-device — nothing ever uploaded
               </div>
-            </div>
+              <h1 className="mt-6 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
+                Bank statement to Excel <span className="text-emerald">software</span>
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Drop a PDF below and watch your transactions appear — parsed entirely in your
+                browser, in seconds. No signup, no upload, works with banks in the US, India, UK
+                and beyond.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
+                <TrustPill icon={Check} label="No signup required" />
+                <TrustPill icon={Lock} label="Processed on your device" />
+                <TrustPill icon={InfinityIcon} label="Unlimited pages on Pro" />
+              </div>
+            </ScrollReveal>
 
-            {/* trust bar */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
-              <TrustPill icon={ShieldCheck} label="SOC 2 architecture" />
-              <TrustPill icon={Lock} label="Zero-server privacy" />
-              <TrustPill icon={InfinityIcon} label="No page caps on Pro" />
-              <TrustPill icon={Zap} label="~4s per 20-page statement" />
-            </div>
+            <ScrollReveal>
+              <HeroDemo />
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -147,33 +113,42 @@ function Landing() {
       {/* HOW IT WORKS */}
       <section className="border-b border-border py-20">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
+          <ScrollReveal className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               From messy PDF to clean spreadsheet in three steps
             </h2>
-          </div>
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
-            <StepCard
-              n={1}
-              icon={FileText}
-              title="Drop your statements"
-              body="Drag one or many PDF statements into LedgerLocal. Multi-account bundles are handled automatically."
-            />
-            <StepCard
-              n={2}
-              icon={Table2}
-              title="Review & correct"
-              body="Extracted transactions land in an editable table. Spot-check anything before export — inline edits, split rows, categorize."
-            />
-            <StepCard
-              n={3}
-              icon={Download}
-              title="Export anywhere"
-              body="Excel, CSV, Tally XML, OFX, QIF, QBO. Drop straight into QuickBooks, Xero, Tally or your ledger."
-            />
-          </div>
+          </ScrollReveal>
+          <ScrollRevealGroup className="mt-14 grid gap-6 lg:grid-cols-3">
+            <ScrollRevealItem>
+              <StepCard
+                n={1}
+                visual={<DropVisual />}
+                title="Drop your statement"
+                body="Drag one or many PDF statements into LedgerLocal. Multi-account bundles are handled automatically."
+              />
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <StepCard
+                n={2}
+                visual={<ParseVisual />}
+                title="Parses on your device"
+                body="Every page is read and matched locally in your browser with a deterministic layout parser — nothing is sent to a server, ever."
+              />
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <StepCard
+                n={3}
+                visual={<ExportVisual />}
+                title="Download clean data"
+                body="Excel, CSV, Tally XML, OFX, QIF, QBO. Drop straight into QuickBooks, Xero, Tally or your ledger."
+              />
+            </ScrollRevealItem>
+          </ScrollRevealGroup>
         </div>
       </section>
+
+      {/* REVIEW EVERY TRANSACTION, SIDE BY SIDE */}
+      <TransactionSideBySide />
 
       {/* SECURITY */}
       <section id="security" className="border-b border-border bg-ink py-20 text-background">
@@ -265,14 +240,12 @@ function TrustPill({ icon: Icon, label }: { icon: any; label: string }) {
 }
 
 function StepCard({
-  n, icon: Icon, title, body,
-}: { n: number; icon: any; title: string; body: string }) {
+  n, visual, title, body,
+}: { n: number; visual: ReactNode; title: string; body: string }) {
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-soft text-emerald">
-          <Icon className="h-4 w-4" />
-        </div>
+        {visual}
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Step {n}
         </div>

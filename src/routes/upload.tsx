@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-import { Upload, FileText, X, ShieldCheck, Loader2, Check, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { FileText, X, ShieldCheck, Loader2, Check, AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { StatementDropzone } from "@/components/statement-dropzone";
 import { useStatementStore } from "@/lib/statement-store";
 import { parseStatementFile } from "@/lib/pdf/parse-statement";
 
@@ -19,8 +20,6 @@ export const Route = createFileRoute("/upload")({
 
 function UploadPage() {
   const nav = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragOver, setDragOver] = useState(false);
   const [liveLabel, setLiveLabel] = useState<string>("");
 
   const pendingFiles = useStatementStore((s) => s.pendingFiles);
@@ -69,41 +68,7 @@ function UploadPage() {
       <div className="mx-auto max-w-4xl space-y-6">
         {phase === "idle" && (
           <>
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOver(false);
-                if (e.dataTransfer.files) addFiles(e.dataTransfer.files);
-              }}
-              onClick={() => inputRef.current?.click()}
-              className={`group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed bg-card px-8 py-16 transition ${
-                dragOver ? "border-emerald bg-emerald-soft/40" : "border-border hover:border-emerald/60 hover:bg-surface-muted"
-              }`}
-            >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-soft text-emerald">
-                <Upload className="h-7 w-7" />
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-semibold text-ink">Drop PDF statements here</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  or click to browse — multi-file, no size cap, no page limit on Pro
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-accent-foreground">
-                <ShieldCheck className="h-3 w-3 text-emerald" />
-                Processed on your device — nothing uploaded, ever
-              </div>
-              <input
-                ref={inputRef}
-                type="file"
-                multiple
-                accept="application/pdf"
-                className="hidden"
-                onChange={(e) => e.target.files && addFiles(e.target.files)}
-              />
-            </div>
+            <StatementDropzone variant="full" onFiles={addFiles} />
 
             {pendingFiles.length > 0 && (
               <div className="rounded-xl border border-border bg-card">
