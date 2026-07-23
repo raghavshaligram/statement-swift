@@ -1,6 +1,7 @@
 import type { Transaction } from "../statement-store";
 import type { ExportOptions } from "./types";
 import { sortByDate, triggerDownload } from "./types";
+import { formatAmount } from "../pdf/detect-currency";
 
 function csvEscape(value: string | number): string {
   const s = String(value);
@@ -8,7 +9,16 @@ function csvEscape(value: string | number): string {
   return s;
 }
 
-export function exportToCsv(transactions: Transaction[], options: ExportOptions, fileName: string) {
+function fmt(value: number, options: ExportOptions, currency: string | null): string {
+  return options.includeCurrencySymbol ? formatAmount(value, currency) : value.toFixed(2);
+}
+
+export function exportToCsv(
+  transactions: Transaction[],
+  options: ExportOptions,
+  fileName: string,
+  currency: string | null = null
+) {
   const headers = ["Date", "Description"];
   if (options.splitDebitCredit) headers.push("Debit", "Credit");
   else headers.push("Amount");
@@ -20,11 +30,11 @@ export function exportToCsv(transactions: Transaction[], options: ExportOptions,
   for (const t of sortByDate(transactions)) {
     const row: (string | number)[] = [t.date, t.description];
     if (options.splitDebitCredit) {
-      row.push(t.amount < 0 ? Math.abs(t.amount).toFixed(2) : "", t.amount > 0 ? t.amount.toFixed(2) : "");
+      row.push(t.amount < 0 ? fmt(Math.abs(t.amount), options, currency) : "", t.amount > 0 ? fmt(t.amount, options, currency) : "");
     } else {
-      row.push(t.amount.toFixed(2));
+      row.push(fmt(t.amount, options, currency));
     }
-    if (options.includeBalance) row.push(t.balance !== null ? t.balance.toFixed(2) : "");
+    if (options.includeBalance) row.push(t.balance !== null ? fmt(t.balance, options, currency) : "");
     if (options.includeSourcePage) row.push(t.sourcePage);
     lines.push(row.map(csvEscape).join(","));
   }

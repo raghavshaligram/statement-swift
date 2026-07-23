@@ -59,40 +59,50 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Real values ported from the Figma design reference (LedgerLocalUIDesignSystem
+     repo, src/styles/theme.css) -- tighter radius matches the "compact,
+     software-like" feel; background/ink/border are the actual hex values used
+     there, not oklch approximations. --accent/--accent-foreground are
+     deliberately NOT ported from Figma's file: Figma uses "accent" for its
+     amber/warning color, but our own components use --accent-foreground
+     extensively as the readable-green-text pairing for emerald-soft badges
+     (confidence badges, side-by-side panel, hero demo, export/pricing pages) --
+     porting Figma's literal amber accent-foreground (#ffffff) here would break
+     every one of those. */
+  --radius: 0.375rem;
 
   /* Slate + emerald fintech palette */
-  --background: oklch(0.99 0.005 240);
-  --foreground: oklch(0.22 0.03 250);
-  --ink: oklch(0.18 0.03 250);
+  --background: #f1f4f8;
+  --foreground: #0b1520;
+  --ink: #0b1520;
 
-  --surface: oklch(0.985 0.005 240);
-  --surface-muted: oklch(0.965 0.008 240);
+  --surface: #f7f9fc;
+  --surface-muted: #e2e7f0;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.03 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 250);
+  --card: #ffffff;
+  --card-foreground: #0b1520;
+  --popover: #ffffff;
+  --popover-foreground: #0b1520;
 
-  --primary: oklch(0.35 0.09 165);
-  --primary-foreground: oklch(0.985 0.005 240);
-  /* Deep forest green (darker than the old medium emerald) -- this is the
-     one color token everything else (buttons, active nav pill, badges,
-     credit values) inherits from. */
-  --emerald: oklch(0.42 0.11 162);
-  --emerald-soft: oklch(0.94 0.04 162);
+  --primary: #0e5a40;
+  --primary-foreground: #ffffff;
+  /* Deep forest green -- this is the one color token everything else (buttons,
+     active nav pill, badges, credit values) inherits from. Matches Figma's
+     real --primary value exactly. */
+  --emerald: #0e5a40;
+  --emerald-soft: #deeae4;
 
-  --secondary: oklch(0.96 0.01 240);
-  --secondary-foreground: oklch(0.25 0.03 250);
-  --muted: oklch(0.96 0.008 240);
-  --muted-foreground: oklch(0.5 0.02 250);
+  --secondary: #deeae4;
+  --secondary-foreground: #0b1520;
+  --muted: #e2e7f0;
+  --muted-foreground: #5c6d82;
   --accent: oklch(0.94 0.04 162);
   --accent-foreground: oklch(0.28 0.08 165);
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.985 0.005 240);
-  --border: oklch(0.91 0.01 240);
-  --input: oklch(0.91 0.01 240);
-  --ring: oklch(0.55 0.14 162);
+  --destructive: #be1f2e;
+  --destructive-foreground: #ffffff;
+  --border: rgba(11, 21, 32, 0.09);
+  --input: rgba(11, 21, 32, 0.09);
+  --ring: #0e5a40;
 
   --chart-1: oklch(0.55 0.14 162);
   --chart-2: oklch(0.6 0.12 220);
@@ -100,14 +110,14 @@
   --chart-4: oklch(0.55 0.2 300);
   --chart-5: oklch(0.7 0.15 30);
 
-  --sidebar: oklch(0.22 0.03 250);
-  --sidebar-foreground: oklch(0.9 0.01 240);
-  --sidebar-primary: oklch(0.55 0.14 162);
-  --sidebar-primary-foreground: oklch(0.985 0.005 240);
-  --sidebar-accent: oklch(0.28 0.03 250);
-  --sidebar-accent-foreground: oklch(0.95 0.005 240);
-  --sidebar-border: oklch(0.3 0.03 250);
-  --sidebar-ring: oklch(0.55 0.14 162);
+  --sidebar: #0b1520;
+  --sidebar-foreground: #edf1f6;
+  --sidebar-primary: #0e5a40;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #17253a;
+  --sidebar-accent-foreground: #edf1f6;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: #0e5a40;
 }
 
 @layer base {

@@ -5,6 +5,12 @@ export type ExportOptions = {
   splitDebitCredit: boolean;
   normalizeDatesIso: boolean;
   includeSourcePage: boolean;
+  // Only applies to CSV/Excel -- Tally XML/OFX/QIF/QBO are structured
+  // accounting-import formats that need plain numbers to parse correctly on
+  // the receiving end, so this toggle has no effect on those regardless of
+  // its value.
+  includeCurrencySymbol: boolean;
+  omitLowConfidence: boolean;
 };
 
 export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
@@ -12,6 +18,8 @@ export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
   splitDebitCredit: false,
   normalizeDatesIso: true,
   includeSourcePage: false,
+  includeCurrencySymbol: false,
+  omitLowConfidence: false,
 };
 
 export function triggerDownload(blob: Blob, fileName: string) {

@@ -6,6 +6,7 @@ import {
 import { AppShell } from "@/components/app-shell";
 import { useStatementStore } from "@/lib/statement-store";
 import { runExport, DEFAULT_EXPORT_OPTIONS, type ExportFormat, type ExportOptions } from "@/lib/export";
+import { getConfidenceTier } from "@/lib/pdf/confidence";
 
 export const Route = createFileRoute("/export")({
   head: () => ({
@@ -20,20 +21,21 @@ export const Route = createFileRoute("/export")({
 });
 
 const FORMATS: Array<{
-  key: ExportFormat; name: string; ext: string; icon: typeof FileSpreadsheet; desc: string; tone: string;
+  key: ExportFormat; name: string; ext: string; icon: typeof FileSpreadsheet; desc: string; tone: string; pro: boolean;
 }> = [
-  { key: "xlsx", name: "Excel", ext: ".xlsx", icon: FileSpreadsheet, desc: "Native Microsoft Excel workbook with formatted columns.", tone: "emerald" },
-  { key: "csv",  name: "CSV",   ext: ".csv",  icon: FileText,        desc: "Universal comma-separated. Opens in anything.",       tone: "slate" },
-  { key: "tally", name: "Tally XML", ext: ".xml", icon: FileCode,    desc: "Direct import into Tally Prime / ERP 9 daybook.",     tone: "slate" },
-  { key: "ofx", name: "OFX",   ext: ".ofx",  icon: FileType,        desc: "Open Financial Exchange — Quicken, Money.",           tone: "slate" },
-  { key: "qif", name: "QIF",   ext: ".qif",  icon: FileType,        desc: "Legacy Quicken import format.",                       tone: "slate" },
-  { key: "qbo", name: "QBO",   ext: ".qbo",  icon: FileType,        desc: "QuickBooks Web Connect — imports as a bank feed.",    tone: "slate" },
+  { key: "xlsx", name: "Excel", ext: ".xlsx", icon: FileSpreadsheet, desc: "Native Microsoft Excel workbook with formatted columns.", tone: "emerald", pro: false },
+  { key: "csv",  name: "CSV",   ext: ".csv",  icon: FileText,        desc: "Universal comma-separated. Opens in anything.",       tone: "slate", pro: false },
+  { key: "tally", name: "Tally XML", ext: ".xml", icon: FileCode,    desc: "Direct import into Tally Prime / ERP 9 daybook.",     tone: "slate", pro: true },
+  { key: "ofx", name: "OFX",   ext: ".ofx",  icon: FileType,        desc: "Open Financial Exchange — Quicken, Money.",           tone: "slate", pro: true },
+  { key: "qif", name: "QIF",   ext: ".qif",  icon: FileType,        desc: "Legacy Quicken import format.",                       tone: "slate", pro: true },
+  { key: "qbo", name: "QBO",   ext: ".qbo",  icon: FileType,        desc: "QuickBooks Web Connect — imports as a bank feed.",    tone: "slate", pro: true },
 ];
 
 function ExportPage() {
   const nav = useNavigate();
   const statements = useStatementStore((s) => s.statements);
   const rows = useMemo(() => statements.flatMap((st) => st.transactions), [statements]);
+  const currency = useMemo(() => statements.find((st) => st.currency)?.currency ?? null, [statements]);
 
   useEffect(() => {
     if (statements.length === 0) nav({ to: "/upload" });
@@ -49,8 +51,10 @@ function ExportPage() {
     return statements.length > 1 ? `${first}-and-${statements.length - 1}-more` : first || "statement";
   }, [statements]);
 
-  // Mirrors the exact header-building logic in lib/export/to-csv.ts, so this
-  // list always reflects what a real export will actually contain.
+  const includedRows = useMemo(
+    () => (options.omitLowConfidence ? rows.filter((r) => getConfidenceTier(r.confidence) !== "low") : rows),
+    [rows, options.omitLowConfidence]
+  );
   const columnList = useMemo(() => {
     const cols = ["Date", "Description"];
     if (options.splitDebitCredit) cols.push("Debit", "Credit");
@@ -61,7 +65,7 @@ function ExportPage() {
   }, [options]);
 
   function handleDownload() {
-    runExport(selected, rows, baseFileName, options, oneSheetPerStatement);
+    runExport(selected, rows, baseFileName, options, oneSheetPerStatement, currency);
     setDownloaded((s) => ({ ...s, [selected]: true }));
   }
 
@@ -109,6 +113,11 @@ function ExportPage() {
                           : "border-border bg-card hover:border-emerald/50"
                       }`}
                     >
+                      {f.pro && (
+                        <span className="absolute right-2 top-2 rounded border border-amber-200 bg-amber-100 px-1.5 py-0.5 font-mono text-[9px] font-bold text-amber-700">
+                          PRO
+                        </span>
+                      )}
                       <div className="flex items-start justify-between">
                         <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
                           f.tone === "emerald" ? "bg-emerald text-primary-foreground" : "bg-surface-muted text-ink"
@@ -160,6 +169,16 @@ function ExportPage() {
                   checked={oneSheetPerStatement}
                   onChange={setOneSheetPerStatement}
                 />
+                <Toggle
+                  label="Currency symbol"
+                  checked={options.includeCurrencySymbol}
+                  onChange={(v) => setOptions((o) => ({ ...o, includeCurrencySymbol: v }))}
+                />
+                <Toggle
+                  label="Omit low-confidence rows"
+                  checked={options.omitLowConfidence}
+                  onChange={(v) => setOptions((o) => ({ ...o, omitLowConfidence: v }))}
+                />
               </div>
             </div>
           </div>
@@ -171,7 +190,7 @@ function ExportPage() {
               </div>
               <dl className="mt-4 space-y-2.5 text-xs">
                 <SummaryRow label="Format" value={`${FORMATS.find((f) => f.key === selected)?.name} (${FORMATS.find((f) => f.key === selected)?.ext})`} />
-                <SummaryRow label="Rows" value={`${rows.length} transactions`} />
+                <SummaryRow label="Rows" value={`${includedRows.length} transactions`} />
                 <SummaryRow label="Columns" value={columnList.join(", ")} />
                 <SummaryRow label="Header row" value="Yes" />
                 <SummaryRow label="Source file" value={statements[0]?.fileName ?? baseFileName} mono />
@@ -183,6 +202,11 @@ function ExportPage() {
                 <Download className="h-4 w-4" />
                 {downloaded[selected] ? "Downloaded — click to re-download" : `Download ${FORMATS.find((f) => f.key === selected)?.name}`}
               </button>
+              {FORMATS.find((f) => f.key === selected)?.pro && (
+                <p className="mt-2 text-center text-[11px] text-amber-400/90">
+                  {FORMATS.find((f) => f.key === selected)?.name} requires Pro
+                </p>
+              )}
               <div className="mt-3 text-center text-[11px] text-background/50">
                 Generated locally · nothing uploaded
               </div>
@@ -194,8 +218,8 @@ function ExportPage() {
           <div className="text-sm font-semibold text-ink">What's next?</div>
           <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
             <NextCard title="Convert another statement" body="Your queue is cleared — drop a new PDF." to="/upload" />
-            <NextCard title="Set up bank rules (Pro)" body="Auto-categorize repeat merchants across statements." to="/pricing" />
-            <NextCard title="Get Pro" body="Unlimited pages, all six formats, no credits." to="/pricing" />
+            <NextCard title="Side-by-side review" body="Compare extracted rows against the raw statement text." to="/preview" />
+            <NextCard title="Get Pro" body="Unlimited pages per statement, plus Tally/OFX/QIF/QBO formats." to="/pricing" />
           </div>
         </div>
       </div>
@@ -228,7 +252,7 @@ function SummaryRow({ label, value, mono }: { label: string; value: string; mono
   );
 }
 
-function NextCard({ title, body, to }: { title: string; body: string; to: "/upload" | "/pricing" }) {
+function NextCard({ title, body, to }: { title: string; body: string; to: "/upload" | "/pricing" | "/preview" }) {
   return (
     <Link to={to} className="rounded-lg border border-border bg-surface-muted/40 p-4 transition hover:border-emerald hover:bg-emerald-soft/30">
       <div className="text-sm font-semibold text-ink">{title}</div>

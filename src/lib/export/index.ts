@@ -6,6 +6,7 @@ import { exportToOfx } from "./to-ofx";
 import { exportToQif } from "./to-qif";
 import { exportToQbo } from "./to-qbo";
 import { DEFAULT_EXPORT_OPTIONS, type ExportOptions } from "./types";
+import { getConfidenceTier } from "../pdf/confidence";
 
 export type ExportFormat = "xlsx" | "csv" | "tally" | "ofx" | "qif" | "qbo";
 
@@ -23,23 +24,29 @@ export function runExport(
   transactions: Transaction[],
   baseFileName: string,
   options: ExportOptions = DEFAULT_EXPORT_OPTIONS,
-  oneSheetPerStatement = true
+  oneSheetPerStatement = true,
+  currency: string | null = null
 ) {
   const fileName = `${baseFileName}${FORMAT_EXTENSIONS[format]}`;
+  // omitLowConfidence only affects which rows get included, applied uniformly
+  // across every format -- filtered here once rather than in each exporter.
+  const included = options.omitLowConfidence
+    ? transactions.filter((t) => getConfidenceTier(t.confidence) !== "low")
+    : transactions;
 
   switch (format) {
     case "xlsx":
-      return exportToXlsx(transactions, options, fileName, oneSheetPerStatement);
+      return exportToXlsx(included, options, fileName, oneSheetPerStatement, currency);
     case "csv":
-      return exportToCsv(transactions, options, fileName);
+      return exportToCsv(included, options, fileName, currency);
     case "tally":
-      return exportToTallyXml(transactions, fileName);
+      return exportToTallyXml(included, fileName);
     case "ofx":
-      return exportToOfx(transactions, fileName);
+      return exportToOfx(included, fileName);
     case "qif":
-      return exportToQif(transactions, fileName);
+      return exportToQif(included, fileName);
     case "qbo":
-      return exportToQbo(transactions, fileName);
+      return exportToQbo(included, fileName);
   }
 }
 
