@@ -13,11 +13,11 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is it free?",
-    a: "Yes, for occasional use. Free includes a handful of conversions a month with a per-statement page limit. Pro removes both limits for one flat monthly price — no credits, no per-page fees.",
+    a: "Yes, for occasional use. Free includes unlimited conversions with a 10-page-per-statement limit. Pro removes the page limit for one flat monthly price — no credits, no per-page fees.",
   },
   {
     q: "Which banks and formats are supported?",
-    a: "Parser profiles for major US, Indian, UK and European banks — Chase, Bank of America, Wells Fargo, ICICI, HDFC, SBI and more — plus a generic layout parser for anything else with a text-based PDF. Export to Excel, CSV, Tally XML, OFX, QIF, or QBO.",
+    a: "Named detection for Chase, Bank of America, Wells Fargo, ICICI, HDFC, and SBI, plus a generic layout parser for any other bank's text-based PDF statement. Export to Excel, CSV, Tally XML, OFX, QIF, or QBO.",
   },
   {
     q: "Does it work with scanned PDFs?",
@@ -38,8 +38,22 @@ const FAQ: Array<{ q: string; a: string }> = [
 ];
 
 export function HomepageFaq() {
+  // Structured data generated from the exact same FAQ array rendered below --
+  // deliberately not a separately-maintained copy, so the schema can never
+  // say something different from what a visitor actually sees on the page.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  };
+
   return (
     <section className="border-b border-border py-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mx-auto max-w-3xl px-6">
         <ScrollReveal className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">

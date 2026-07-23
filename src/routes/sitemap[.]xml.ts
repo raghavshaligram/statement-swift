@@ -1,17 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "";
+const BASE_URL = "https://ledgerlocal.com";
+
+/**
+ * Real, indexable content pages only. Deliberately excludes /preview and
+ * /export -- both redirect to /upload when there's no parsed statement in
+ * the store (see preview.tsx/export.tsx), so a search engine crawling them
+ * cold would just hit a redirect or a blank shell. Indexing them would be
+ * actively counterproductive, not just unhelpful.
+ *
+ * IMPORTANT: this list is maintained by hand, not generated from the routes
+ * directory. When adding a new real content page (a new bank page, format
+ * page, or guide), add it here too -- this exact list drifting out of sync
+ * with the real routes is what caused the original bug this file fixes.
+ */
+const entries = [
+  { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/pricing", changefreq: "monthly", priority: "0.8" },
+  { path: "/upload", changefreq: "monthly", priority: "0.8" },
+  { path: "/bank-statement-to-tally", changefreq: "monthly", priority: "0.6" },
+  { path: "/bank-statement-to-ofx", changefreq: "monthly", priority: "0.6" },
+  { path: "/bank-statement-to-qif", changefreq: "monthly", priority: "0.6" },
+  { path: "/chase-bank-statement-to-excel", changefreq: "monthly", priority: "0.6" },
+  { path: "/icici-bank-statement-to-excel", changefreq: "monthly", priority: "0.6" },
+];
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const entries = [
-          { path: "/", changefreq: "weekly", priority: "1.0" },
-          { path: "/pricing", changefreq: "monthly", priority: "0.8" },
-          { path: "/upload", changefreq: "monthly", priority: "0.7" },
-        ];
         const urls = entries.map(
           (e) =>
             `  <url>\n    <loc>${BASE_URL}${e.path}</loc>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>`

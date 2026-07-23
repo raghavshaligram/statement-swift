@@ -87,7 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "LedgerLocal — Bank Statement to Excel Software" },
       {
         property: "og:description",
-        content: "Convert PDF bank statements to Excel, CSV, Tally, OFX, QIF, QBO. On-device, unlimited pages.",
+        content: "Convert PDF bank statements to Excel, CSV, Tally, OFX, QIF, QBO. 100% on-device. Free up to 10 pages per statement.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,6 +100,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "LedgerLocal",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Web",
+          description:
+            "Converts PDF bank statements into Excel, CSV, Tally XML, OFX, QIF, and QBO files entirely on-device, with no upload to any server.",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            description: "Free tier: unlimited conversions, up to 10 pages per statement.",
+          },
+        }),
       },
     ],
   }),
