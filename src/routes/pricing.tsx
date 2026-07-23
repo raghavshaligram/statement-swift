@@ -143,8 +143,8 @@ function Pricing() {
             {[
               ["Is my statement really not uploaded?", "Correct. LedgerLocal parses PDFs entirely in your browser using WebAssembly. You can verify this in your browser's DevTools Network tab during a conversion — there are zero outbound requests carrying your file."],
               ["Do I need an account?", "No. You can use Free without signing up. An account is only needed if you want Pro (to attach a subscription)."],
-              ["What if my bank isn't listed?", "LedgerLocal's generic parser handles most layouts automatically. If a specific bank isn't producing clean output, request a profile — new banks are added weekly."],
-              ["Can I use it offline?", "Yes. Once the page has loaded once, LedgerLocal works fully offline. Great for airports and sensitive audits."],
+              ["What if my bank isn't listed?", "LedgerLocal's generic parser handles most layouts automatically even without a named profile for your bank. If a specific bank isn't producing clean output, you can request a profile from the homepage."],
+              ["Does LedgerLocal need an internet connection?", "Yes — you need to load the page like any web app, and Pro accounts need connectivity to verify your subscription. But your statement's content is processed entirely on your device once the page has loaded; the PDF itself is never sent anywhere."],
               ["Team plan?", "Yes — email us. Same flat idea, per-seat billing."],
             ].map(([q, a]) => (
               <div key={q} className="rounded-lg border border-border bg-card p-5">

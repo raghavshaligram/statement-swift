@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Download, ArrowRight, Check, X, AlertCircle, AlertTriangle, Trash2 } from "lucide-react";
+import { Search, Download, ArrowRight, Check, X, AlertCircle, AlertTriangle, Trash2, TableProperties, FileText } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { SideBySidePane } from "@/components/side-by-side-pane";
 import { useStatementStore } from "@/lib/statement-store";
 import { formatAmount } from "@/lib/pdf/detect-currency";
+import { getConfidenceTier } from "@/lib/pdf/confidence";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "@/lib/statement-store";
 
@@ -28,12 +30,13 @@ function PreviewPage() {
   const deleteTransaction = useStatementStore((s) => s.deleteTransaction);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<FilterTab>("all");
+  const [view, setView] = useState<"table" | "sidebyside">("table");
   const [editing, setEditing] = useState<{ id: string; field: keyof Transaction } | null>(null);
 
   const rows = useMemo(() => statements.flatMap((st) => st.transactions), [statements]);
   const warnings = useMemo(() => statements.flatMap((st) => st.warnings), [statements]);
   const currency = useMemo(() => statements.find((st) => st.currency)?.currency ?? null, [statements]);
-  const flaggedCount = rows.filter((r) => r.confidence === "low").length;
+  const flaggedCount = rows.filter((r) => getConfidenceTier(r.confidence) === "low").length;
 
   // No parsed statements in the store (e.g. direct nav, or a page refresh which
   // clears in-memory state) — send back to upload rather than show an empty table.
@@ -48,7 +51,7 @@ function PreviewPage() {
         .filter((r) => {
           if (tab === "credits") return r.amount > 0;
           if (tab === "debits") return r.amount < 0;
-          if (tab === "flagged") return r.confidence === "low";
+          if (tab === "flagged") return getConfidenceTier(r.confidence) === "low";
           return true;
         }),
     [rows, q, tab]
@@ -104,7 +107,29 @@ function PreviewPage() {
           </Link>
         </div>
 
-        {/* Search + filter tabs */}
+        {/* View toggle -- Table vs Side-by-side */}
+        <div className="flex items-center gap-0.5 rounded-lg bg-surface-muted/60 p-1 w-fit">
+          {(
+            [
+              ["table", "Table", TableProperties],
+              ["sidebyside", "Side-by-side", FileText],
+            ] as const
+          ).map(([id, label, Icon]) => (
+            <button
+              key={id}
+              onClick={() => setView(id)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                view === id ? "bg-card text-ink shadow-sm" : "text-muted-foreground hover:text-ink"
+              )}
+            >
+              <Icon className="h-3 w-3" /> {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search + filter tabs -- table-view only, side-by-side has its own read-only browsing */}
+        {view === "table" && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
           <div className="flex flex-1 flex-wrap items-center gap-2">
             <div className="relative max-w-md flex-1">
@@ -144,8 +169,9 @@ function PreviewPage() {
             <span className="font-mono">{filtered.length}</span> row{filtered.length === 1 ? "" : "s"} · Click any cell to edit
           </div>
         </div>
+        )}
 
-        {/* Table */}
+        {view === "table" ? (
         <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
@@ -162,7 +188,7 @@ function PreviewPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map((r) => {
-                const flagged = r.confidence === "low";
+                const flagged = getConfidenceTier(r.confidence) === "low";
                 const debit = r.amount < 0 ? -r.amount : null;
                 const credit = r.amount > 0 ? r.amount : null;
                 return (
@@ -211,7 +237,7 @@ function PreviewPage() {
                       {r.balance !== null ? r.balance.toFixed(2) : "—"}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <ConfidenceBadge low={flagged} />
+                      <ConfidenceBadge score={r.confidence} />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <button
@@ -227,6 +253,37 @@ function PreviewPage() {
               })}
             </tbody>
           </table>
+        </div>
+        ) : (
+        <div className="rounded-xl bg-surface-muted/40 p-4">
+          <SideBySidePane
+            transactions={rows}
+            currency={currency}
+            headerLine={statements[0] ? `${statements[0].detectedBank ?? "Statement"} — ${statements[0].fileName}` : undefined}
+          />
+          <p className="mt-3 text-center font-mono text-[10px] text-muted-foreground">
+            Showing all {rows.length} parsed transactions · hover either panel to sync-highlight · switch to Table view to edit
+          </p>
+        </div>
+        )}
+
+        {/* Confidence-key legend, matching the design reference's footer bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-ink px-4 py-2.5 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-background/50">confidence key</span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald/30 bg-emerald-soft px-2 py-0.5 font-mono text-[10px] font-semibold text-accent-foreground">
+              ≥90% high
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-semibold text-amber-700">
+              75-89% medium
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-destructive">
+              &lt;75% low
+            </span>
+          </div>
+          <span className="font-mono text-background/50">
+            {view === "table" ? "double-click any cell to edit" : "side-by-side — read-only · switch to Table to edit"}
+          </span>
         </div>
 
         <div className="flex items-center justify-end">
@@ -264,23 +321,23 @@ function StatItem({ label, value, tone }: { label: string; value: string; tone?:
 }
 
 /**
- * Honest confidence indicator. The real parser only ever computes a binary
- * high/low signal (see parse-transactions.ts) -- there's no underlying
- * numeric score today, so this shows High/Low rather than a fabricated
- * percentage. A real per-row confidence score is a planned follow-up.
+ * Real weighted confidence score (see parse-transactions.ts), bucketed into
+ * the same three tiers shown in the confidence-key legend below the table:
+ * >=90% high (green), 75-89% medium (amber), <75% low (red).
  */
-function ConfidenceBadge({ low }: { low: boolean }) {
+function ConfidenceBadge({ score }: { score: number }) {
+  const tier = getConfidenceTier(score);
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold",
-        low
-          ? "border-destructive/30 bg-destructive/10 text-destructive"
-          : "border-emerald/30 bg-emerald-soft text-accent-foreground"
+        tier === "high" && "border-emerald/30 bg-emerald-soft text-accent-foreground",
+        tier === "medium" && "border-amber-400/40 bg-amber-50 text-amber-700",
+        tier === "low" && "border-destructive/30 bg-destructive/10 text-destructive"
       )}
     >
-      {low ? <X className="h-2.5 w-2.5" /> : <Check className="h-2.5 w-2.5" />}
-      {low ? "Low" : "High"}
+      {tier === "low" ? <X className="h-2.5 w-2.5" /> : <Check className="h-2.5 w-2.5" />}
+      {score}%
     </span>
   );
 }

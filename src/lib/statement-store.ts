@@ -8,7 +8,8 @@ export type Transaction = {
   balance: number | null; // null when a running balance wasn't found on that row
   sourceFile: string;
   sourcePage: number;
-  confidence: "high" | "low"; // "low" gets flagged for manual review
+  confidence: number; // 0-99, never 100 (never claim certainty from a heuristic) -- see confidence.ts for tier bucketing
+  sourceLines: string[]; // raw PDF text lines that produced this transaction, for the side-by-side review view
 };
 
 export type ParsedStatement = {

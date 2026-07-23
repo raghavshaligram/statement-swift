@@ -2,6 +2,7 @@ import { extractPdfText } from "./extract-text";
 import { parseTransactionsFromPages } from "./parse-transactions";
 import { detectBank, BANK_LABELS } from "./bank-detection";
 import { detectCurrency } from "./detect-currency";
+import { getConfidenceTier } from "./confidence";
 import type { ParsedStatement, Transaction } from "../statement-store";
 
 export async function parseStatementFile(
@@ -51,10 +52,10 @@ export async function parseStatementFile(
     );
   }
 
-  const lowConfidenceCount = raw.filter((t) => t.confidence === "low").length;
+  const lowConfidenceCount = raw.filter((t) => getConfidenceTier(t.confidence) === "low").length;
   if (lowConfidenceCount > 0) {
     warnings.push(
-      `${lowConfidenceCount} row${lowConfidenceCount > 1 ? "s" : ""} had only one number detected (couldn't tell amount from balance) — flagged for manual review.`
+      `${lowConfidenceCount} row${lowConfidenceCount > 1 ? "s" : ""} scored below 75% confidence — flagged for manual review before exporting.`
     );
   }
 
@@ -67,6 +68,7 @@ export async function parseStatementFile(
     sourceFile: file.name,
     sourcePage: t.sourcePage,
     confidence: t.confidence,
+    sourceLines: t.sourceLines,
   }));
 
   return {

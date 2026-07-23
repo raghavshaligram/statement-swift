@@ -194,14 +194,14 @@ function Landing() {
             <p className="mt-4 text-base leading-relaxed text-background/70">
               Competing "converters" upload your PDF to their servers, parse it there, then email
               you the result. LedgerLocal parses everything locally using WebAssembly — the file never
-              touches the network. You can literally unplug your ethernet cable mid-conversion.
+              touches the network, even though the page itself is a normal web app you load online.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               {[
-                "Zero server-side processing — no logs, no retention",
-                "Works fully offline after first load",
+                "Zero server-side processing of your statement — no logs, no retention",
+                "Your file is parsed entirely on your device, not uploaded anywhere",
                 "Open, auditable client-side pipeline",
-                "No account required, ever",
+                "No account required for Free — only needed to subscribe to Pro",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald" />

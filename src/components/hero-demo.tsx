@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { StatementDropzone } from "@/components/statement-dropzone";
 import { useStatementStore } from "@/lib/statement-store";
 import { parseStatementFile } from "@/lib/pdf/parse-statement";
+import { getConfidenceTier } from "@/lib/pdf/confidence";
 
 // Hardcoded, clearly-labeled example — never shown as if it were a real parse.
 const EXAMPLE_ROWS = [
@@ -78,7 +79,7 @@ export function HeroDemo() {
     () => statements.flatMap((st) => st.transactions),
     [statements]
   );
-  const flaggedCount = allTransactions.filter((t) => t.confidence === "low").length;
+  const flaggedCount = allTransactions.filter((t) => getConfidenceTier(t.confidence) === "low").length;
   const shown = allTransactions.slice(0, 6);
   const remaining = allTransactions.length - shown.length;
 

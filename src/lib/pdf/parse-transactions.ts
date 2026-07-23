@@ -8,7 +8,8 @@ export type RawTransaction = {
   amount: number;
   balance: number | null;
   sourcePage: number;
-  confidence: "high" | "low";
+  confidence: number; // 0-99, base score before the balance-continuity pass applied in parseTransactionsFromPages
+  sourceLines: string[]; // raw text of every row in this transaction's block, for the side-by-side review view
 };
 
 // --- date parsing -----------------------------------------------------------
@@ -33,13 +34,16 @@ const MONTHS: Record<string, string> = {
 };
 
 /** Finds the first date-like match in text and resolves it to ISO, using the document's inferred date order for ambiguous numeric formats. */
-function findDate(text: string, dateOrder: DateOrder): { iso: string; matchedText: string } | null {
+function findDate(
+  text: string,
+  dateOrder: DateOrder
+): { iso: string; matchedText: string; unambiguous: boolean } | null {
   for (const { re, kind } of DATE_PATTERNS) {
     const m = text.match(re);
     if (!m) continue;
 
     if (kind === "iso") {
-      return { iso: `${m[1]}-${m[2]}-${m[3]}`, matchedText: m[0] };
+      return { iso: `${m[1]}-${m[2]}-${m[3]}`, matchedText: m[0], unambiguous: true };
     }
 
     if (kind === "monthName") {
@@ -51,16 +55,20 @@ function findDate(text: string, dateOrder: DateOrder): { iso: string; matchedTex
       const dayStr = isMonthFirst ? m[2] : m[1];
       const month = MONTHS[monthStr.toLowerCase().slice(0, 3)];
       if (!month) continue;
-      return { iso: `${m[3]}-${month}-${dayStr.padStart(2, "0")}`, matchedText: m[0] };
+      return { iso: `${m[3]}-${month}-${dayStr.padStart(2, "0")}`, matchedText: m[0], unambiguous: true };
     }
 
     // ambiguous numeric -- resolve using the document-wide inferred order,
     // with per-token override when this specific date is independently
-    // unambiguous (see resolveAmbiguousDate).
+    // unambiguous (see resolveAmbiguousDate). Note: even when resolveAmbiguousDate
+    // finds a per-token unambiguous resolution (e.g. day > 12), we still mark
+    // this "not unambiguous" for scoring purposes, since that nuance isn't
+    // tracked back here -- treating the whole "ambiguous" pattern kind as the
+    // slightly-less-certain case is a reasonable simplification.
     let year = m[3];
     if (year.length === 2) year = `20${year}`;
     const iso = resolveAmbiguousDate(m[1], m[2], year, dateOrder);
-    if (iso) return { iso, matchedText: m[0] };
+    if (iso) return { iso, matchedText: m[0], unambiguous: false };
   }
   return null;
 }
@@ -242,8 +250,11 @@ function buildTransactionFromBlock(
 
   let amount: number | null = null;
   let balance: number | null = null;
-  let confidence: "high" | "low" = "low";
   const consumedRaw: string[] = [];
+  // Tracks how the amount was actually resolved, for scoring below --
+  // column-based classification is the strongest signal, a 2-number
+  // positional fallback is decent, and a single bare number is the weakest.
+  let amountSignal: "column" | "positional" | "single" = "single";
 
   if (columns) {
     // Header-based classification: each number belongs to whichever column
@@ -265,7 +276,7 @@ function buildTransactionFromBlock(
         consumedRaw.push(n.raw);
       }
     }
-    if (amount !== null) confidence = "high";
+    if (amount !== null) amountSignal = "column";
   }
 
   if (amount === null) {
@@ -278,21 +289,36 @@ function buildTransactionFromBlock(
       amount = secondLast.value;
       balance = last.value;
       consumedRaw.push(secondLast.raw, last.raw);
-      confidence = "high";
+      amountSignal = "positional";
     } else if (/\b(opening|closing|beginning|ending)\s+balance\b/i.test(combinedText)) {
       amount = 0;
       balance = numbers[0].value;
       consumedRaw.push(numbers[0].raw);
-      confidence = "high";
+      amountSignal = "positional"; // a labeled balance line is about as reliable as a 2-number match
     } else {
       amount = numbers[0].value;
       balance = null;
       consumedRaw.push(numbers[0].raw);
-      confidence = "low";
+      amountSignal = "single";
     }
   }
 
   const description = buildDescription(block, dateResult.matchedText, consumedRaw);
+
+  // --- Weighted confidence score ---------------------------------------
+  // Base score plus points for each independent signal that came out clean.
+  // Calibrated so a fully-clean row (column-matched amount, balance found,
+  // clean description, unambiguous date) lands in the high 90s, and a row
+  // that only found one bare number lands in the 60s-70s -- roughly matching
+  // real-world examples seen during testing against an actual bank statement.
+  // The balance-continuity adjustment (the strongest single signal available)
+  // is applied afterward in parseTransactionsFromPages, since it needs the
+  // neighboring transaction's balance.
+  let score = 60;
+  score += amountSignal === "column" ? 15 : amountSignal === "positional" ? 8 : -5;
+  score += balance !== null ? 10 : 0;
+  score += description !== "(description not detected)" && description.trim().length > 2 ? 8 : 0;
+  score += dateResult.unambiguous ? 8 : 4;
 
   return {
     date: dateResult.iso,
@@ -300,7 +326,8 @@ function buildTransactionFromBlock(
     amount: amount ?? 0,
     balance,
     sourcePage: pageNumber,
-    confidence,
+    confidence: Math.max(1, Math.min(99, Math.round(score))),
+    sourceLines: block.rows.map((r) => r.text),
   };
 }
 
@@ -348,5 +375,30 @@ export function parseTransactionsFromPages(pages: PageText[], fullText: string):
     }
   }
 
+  applyBalanceContinuityAdjustment(transactions);
+
   return transactions;
+}
+
+/**
+ * Second pass over the full transaction list: for every pair of consecutive
+ * transactions that both have a known balance, checks whether the current
+ * transaction's amount correctly bridges the previous stated balance to the
+ * current one. This is the strongest confidence signal available -- it's an
+ * independent arithmetic check against the bank's own numbers, not just an
+ * inference about layout -- so it gets applied as an adjustment on top of the
+ * base score computed in buildTransactionFromBlock, which can't know about
+ * neighboring transactions.
+ */
+function applyBalanceContinuityAdjustment(transactions: RawTransaction[]): void {
+  for (let i = 1; i < transactions.length; i++) {
+    const prev = transactions[i - 1];
+    const curr = transactions[i];
+    if (prev.balance === null || curr.balance === null) continue; // not applicable -- leave base score as-is
+
+    const expected = prev.balance + curr.amount;
+    const reconciles = Math.abs(expected - curr.balance) < 0.02;
+    const adjustment = reconciles ? 8 : -20;
+    curr.confidence = Math.max(1, Math.min(99, Math.round(curr.confidence + adjustment)));
+  }
 }
