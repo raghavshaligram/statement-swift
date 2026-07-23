@@ -76,7 +76,10 @@
 
   --primary: oklch(0.35 0.09 165);
   --primary-foreground: oklch(0.985 0.005 240);
-  --emerald: oklch(0.55 0.14 162);
+  /* Deep forest green (darker than the old medium emerald) -- this is the
+     one color token everything else (buttons, active nav pill, badges,
+     credit values) inherits from. */
+  --emerald: oklch(0.42 0.11 162);
   --emerald-soft: oklch(0.94 0.04 162);
 
   --secondary: oklch(0.96 0.01 240);

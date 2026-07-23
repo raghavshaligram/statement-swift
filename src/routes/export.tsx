@@ -49,7 +49,16 @@ function ExportPage() {
     return statements.length > 1 ? `${first}-and-${statements.length - 1}-more` : first || "statement";
   }, [statements]);
 
-  const estimatedSizeKb = Math.max(1, Math.round((rows.length * 60) / 1024));
+  // Mirrors the exact header-building logic in lib/export/to-csv.ts, so this
+  // list always reflects what a real export will actually contain.
+  const columnList = useMemo(() => {
+    const cols = ["Date", "Description"];
+    if (options.splitDebitCredit) cols.push("Debit", "Credit");
+    else cols.push("Amount");
+    if (options.includeBalance) cols.push("Balance");
+    if (options.includeSourcePage) cols.push("Source Page");
+    return cols;
+  }, [options]);
 
   function handleDownload() {
     runExport(selected, rows, baseFileName, options, oneSheetPerStatement);
@@ -158,16 +167,15 @@ function ExportPage() {
           <div className="lg:col-span-1">
             <div className="rounded-xl border border-border bg-ink p-5 text-background">
               <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
-                Ready to export
+                Export summary
               </div>
-              <div className="mt-2 font-mono text-lg font-semibold">
-                {baseFileName}{FORMATS.find((f) => f.key === selected)?.ext}
-              </div>
-              <div className="mt-1 text-xs text-background/60">
-                <span className="font-mono">{rows.length}</span> transactions ·{" "}
-                <span className="font-mono">{statements.length}</span> statement{statements.length > 1 ? "s" : ""} ·{" "}
-                ~<span className="font-mono">{estimatedSizeKb}</span> KB
-              </div>
+              <dl className="mt-4 space-y-2.5 text-xs">
+                <SummaryRow label="Format" value={`${FORMATS.find((f) => f.key === selected)?.name} (${FORMATS.find((f) => f.key === selected)?.ext})`} />
+                <SummaryRow label="Rows" value={`${rows.length} transactions`} />
+                <SummaryRow label="Columns" value={columnList.join(", ")} />
+                <SummaryRow label="Header row" value="Yes" />
+                <SummaryRow label="Source file" value={statements[0]?.fileName ?? baseFileName} mono />
+              </dl>
               <button
                 onClick={handleDownload}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-emerald/90"
@@ -208,6 +216,15 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
         <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-background shadow transition ${checked ? "left-4" : "left-0.5"}`} />
       </button>
     </label>
+  );
+}
+
+function SummaryRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <dt className="shrink-0 text-background/50">{label}</dt>
+      <dd className={`text-right text-background ${mono ? "font-mono" : ""}`}>{value}</dd>
+    </div>
   );
 }
 
