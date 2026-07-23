@@ -156,11 +156,13 @@ function ExportPage() {
             <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
               Ready to export
             </div>
-            <div className="mt-2 text-lg font-semibold">
+            <div className="mt-2 font-mono text-lg font-semibold">
               {baseFileName}{FORMATS.find((f) => f.key === selected)?.ext}
             </div>
             <div className="mt-1 text-xs text-background/60">
-              {rows.length} transactions · {statements.length} statement{statements.length > 1 ? "s" : ""} · ~{estimatedSizeKb} KB
+              <span className="font-mono">{rows.length}</span> transactions ·{" "}
+              <span className="font-mono">{statements.length}</span> statement{statements.length > 1 ? "s" : ""} ·{" "}
+              ~<span className="font-mono">{estimatedSizeKb}</span> KB
             </div>
             <button
               onClick={handleDownload}

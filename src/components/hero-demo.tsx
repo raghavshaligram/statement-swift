@@ -140,7 +140,7 @@ export function HeroDemo() {
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Extracted from your file
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-soft px-2 py-0.5 text-[10px] font-medium text-accent-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-soft px-2 py-0.5 font-mono text-[10px] font-medium text-accent-foreground">
               <ShieldCheck className="h-3 w-3 text-emerald" /> Parsed on-device
             </span>
           </div>

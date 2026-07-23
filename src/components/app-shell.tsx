@@ -80,7 +80,7 @@ export function AppShell({
           ))}
         </nav>
         <div className="m-3 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/40 p-3">
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald">
+          <div className="flex items-center gap-2 font-mono text-[11px] font-semibold text-emerald">
             <ShieldCheck className="h-3.5 w-3.5" />
             On-device processing
           </div>
@@ -103,7 +103,7 @@ export function AppShell({
                 ].map((s, i) => (
                   <div key={s.n} className="flex items-center gap-2">
                     <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold ${
+                      className={`flex h-5 w-5 items-center justify-center rounded-full font-mono text-[10px] font-semibold ${
                         step >= s.n
                           ? "bg-emerald text-primary-foreground"
                           : "border border-border bg-surface-muted text-muted-foreground"
@@ -119,7 +119,7 @@ export function AppShell({
             )}
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-1.5 rounded-full border border-border bg-emerald-soft px-3 py-1 text-[11px] font-medium text-accent-foreground sm:flex">
+            <div className="hidden items-center gap-1.5 rounded-full border border-border bg-emerald-soft px-3 py-1 font-mono text-[11px] font-medium text-accent-foreground sm:flex">
               <ShieldCheck className="h-3 w-3" />
               Processed on your device
             </div>

@@ -57,7 +57,7 @@ function Pricing() {
         <div className="mx-auto mt-14 grid max-w-5xl gap-6 px-6 lg:grid-cols-2">
           {/* FREE */}
           <div className="rounded-2xl border border-border bg-card p-8">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</div>
+            <div className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-4xl font-bold text-ink">$0</span>
               <span className="text-sm text-muted-foreground">no signup required</span>
@@ -90,7 +90,7 @@ function Pricing() {
             <div className="absolute right-6 top-6 rounded-full bg-emerald px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
               Recommended
             </div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
+            <div className="font-mono text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-4xl font-bold">$19</span>
               <span className="text-sm text-background/60">/ month · flat</span>

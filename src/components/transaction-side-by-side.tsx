@@ -39,7 +39,7 @@ function rowClass(active: boolean, tone: "left" | "right") {
 
 function chipClass(active: boolean) {
   return cn(
-    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold transition-colors",
+    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-semibold transition-colors",
     active ? "bg-emerald text-primary-foreground" : "bg-surface-muted text-muted-foreground"
   );
 }
@@ -142,7 +142,7 @@ export function TransactionSideBySide() {
                           <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
                         </span>
                       ) : (
-                        <span className="w-8 shrink-0 text-right text-[11px] text-muted-foreground">
+                        <span className="w-8 shrink-0 text-right font-mono text-[11px] text-muted-foreground">
                           {row.pct}%
                         </span>
                       )}

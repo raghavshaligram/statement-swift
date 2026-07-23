@@ -5,8 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Base UI font everywhere: nav, body, labels, buttons, inputs, and every
+     heading except the homepage hero headline (see --font-serif below). */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Homepage hero headline ONLY -- exposed as the `font-serif` utility. */
+  --font-serif: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  /* All numeric/tabular/code-like content -- amounts, dates, confidence
+     scores, status/tier badges, filenames -- exposed as `font-mono`. */
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);

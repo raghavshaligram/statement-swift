@@ -58,7 +58,7 @@ function Landing() {
                 <Lock className="h-3 w-3 text-emerald" />
                 100% on-device — nothing ever uploaded
               </div>
-              <h1 className="mt-6 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
+              <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
                 Bank statement to Excel <span className="text-emerald">software</span>
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -273,7 +273,7 @@ function Landing() {
           <ScrollRevealGroup className="mt-10 grid gap-5 sm:grid-cols-2">
             <ScrollRevealItem>
               <div className="rounded-xl border border-border bg-card p-6">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</div>
+                <div className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">Free</div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-ink">$0</span>
                   <span className="text-sm text-muted-foreground">no signup required</span>
@@ -285,7 +285,7 @@ function Landing() {
             </ScrollRevealItem>
             <ScrollRevealItem>
               <div className="rounded-xl border-2 border-emerald bg-ink p-6 text-background">
-                <div className="text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
+                <div className="font-mono text-xs font-semibold uppercase tracking-wider text-emerald">LedgerLocal Pro</div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-3xl font-bold">$19</span>
                   <span className="text-sm text-background/60">/ month · flat</span>
