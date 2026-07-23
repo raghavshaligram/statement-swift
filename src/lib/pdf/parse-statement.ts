@@ -34,7 +34,7 @@ export async function parseStatementFile(
     );
   }
 
-  const raw = parseTransactionsFromPages(extracted.pages);
+  const raw = parseTransactionsFromPages(extracted.pages, extracted.fullText);
 
   if (raw.length === 0) {
     warnings.push(
