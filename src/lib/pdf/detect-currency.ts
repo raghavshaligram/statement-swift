@@ -22,13 +22,69 @@ import type { BankId } from "./bank-detection";
  * returns null.
  */
 
-const ISO_CODE_RE = /\b(INR|USD|GBP|EUR|AUD|CAD|SGD|AED|JPY|CNY|CHF|NZD|ZAR|PKR)\b/g;
+// Full active ISO 4217 alphabetic currency code list (includes precious-metal
+// codes XAU/XAG/XPD/XPT, the IMF's XDR, bond-market units of account
+// XBA-XBD, the no-currency code XXX and test code XTS, and both the old and
+// new codes for currencies mid-transition e.g. SLL/SLE, ZWL/ZWG -- an unused
+// code here is harmless, it simply never matches).
+const ISO_4217_CODES = [
+  "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN",
+  "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BOV", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD",
+  "CAD", "CDF", "CHE", "CHF", "CHW", "CLF", "CLP", "CNY", "COP", "COU", "CRC", "CUC", "CUP", "CVE", "CZK",
+  "DJF", "DKK", "DOP", "DZD",
+  "EGP", "ERN", "ETB", "EUR",
+  "FJD", "FKP",
+  "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD",
+  "HKD", "HNL", "HTG", "HUF",
+  "IDR", "ILS", "INR", "IQD", "IRR", "ISK",
+  "JMD", "JOD", "JPY",
+  "KES", "KGS", "KHR", "KMF", "KPW", "KRW", "KWD", "KYD", "KZT",
+  "LAK", "LBP", "LKR", "LRD", "LSL", "LYD",
+  "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MXV", "MYR", "MZN",
+  "NAD", "NGN", "NIO", "NOK", "NPR", "NZD",
+  "OMR",
+  "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG",
+  "QAR",
+  "RON", "RSD", "RUB", "RWF",
+  "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLE", "SLL", "SOS", "SRD", "SSP", "STN", "SVC", "SYP", "SZL",
+  "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TWD", "TZS",
+  "UAH", "UGX", "USD", "USN", "UYI", "UYU", "UYW", "UZS",
+  "VED", "VES", "VND", "VUV",
+  "WST",
+  "XAF", "XAG", "XAU", "XBA", "XBB", "XBC", "XBD", "XCD", "XDR", "XOF", "XPD", "XPF", "XPT", "XSU", "XTS", "XUA", "XXX",
+  "YER",
+  "ZAR", "ZMW", "ZWG", "ZWL",
+] as const;
 
+const ISO_CODE_RE = new RegExp(`\\b(${ISO_4217_CODES.join("|")})\\b`, "g");
+
+// Single-Unicode-character currency symbols only. Multi-character symbols
+// (R$, Kč, zł, Rp, kr, ...) need their own string-based check rather than a
+// symbol-map entry, and are intentionally left out here rather than bolted
+// on -- ambiguous ones (like "kr" for NOK/SEK/DKK) especially need more care
+// than a simple includes() check gives them.
 const SYMBOL_MAP: Array<{ symbol: string; currency: string }> = [
   { symbol: "₹", currency: "INR" },
   { symbol: "£", currency: "GBP" },
   { symbol: "€", currency: "EUR" },
   { symbol: "¥", currency: "JPY" },
+  { symbol: "₩", currency: "KRW" },
+  { symbol: "₦", currency: "NGN" },
+  { symbol: "₺", currency: "TRY" },
+  { symbol: "₫", currency: "VND" },
+  { symbol: "₱", currency: "PHP" },
+  { symbol: "฿", currency: "THB" },
+  { symbol: "₪", currency: "ILS" },
+  { symbol: "₽", currency: "RUB" },
+  { symbol: "₴", currency: "UAH" },
+  { symbol: "₡", currency: "CRC" },
+  { symbol: "₲", currency: "PYG" },
+  { symbol: "₵", currency: "GHS" },
+  { symbol: "₾", currency: "GEL" },
+  { symbol: "₼", currency: "AZN" },
+  { symbol: "₸", currency: "KZT" },
+  { symbol: "₮", currency: "MNT" },
+  { symbol: "₭", currency: "LAK" },
 ];
 
 // Bank -> currency of the country that bank operates in. Only used as a last
