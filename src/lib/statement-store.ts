@@ -16,6 +16,7 @@ export type ParsedStatement = {
   fileSizeBytes: number;
   pageCount: number;
   detectedBank: string | null; // e.g. "Chase", "HDFC Bank", or null if unrecognized
+  currency: string | null; // ISO code (e.g. "INR", "USD"), or null if undetected -- never assume USD
   transactions: Transaction[];
   warnings: string[];
 };

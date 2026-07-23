@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, Download, ArrowRight, Check, AlertCircle, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { useStatementStore } from "@/lib/statement-store";
+import { formatAmount } from "@/lib/pdf/detect-currency";
 import type { Transaction } from "@/lib/statement-store";
 
 export const Route = createFileRoute("/preview")({
@@ -27,6 +28,7 @@ function PreviewPage() {
 
   const rows = useMemo(() => statements.flatMap((st) => st.transactions), [statements]);
   const warnings = useMemo(() => statements.flatMap((st) => st.warnings), [statements]);
+  const currency = useMemo(() => statements.find((st) => st.currency)?.currency ?? null, [statements]);
   const flaggedCount = rows.filter((r) => r.confidence === "low").length;
 
   // No parsed statements in the store (e.g. direct nav, or a page refresh which
@@ -83,9 +85,9 @@ function PreviewPage() {
         {/* Summary strip */}
         <div className="grid gap-3 sm:grid-cols-4">
           <SummaryCard label="Transactions" value={rows.length.toString()} />
-          <SummaryCard label="Total credits" value={fmt(credits)} tone="pos" />
-          <SummaryCard label="Total debits" value={fmt(debits)} tone="neg" />
-          <SummaryCard label="Closing balance" value={lastWithBalance ? fmt(lastWithBalance.balance!) : "—"} />
+          <SummaryCard label="Total credits" value={formatAmount(credits, currency)} tone="pos" />
+          <SummaryCard label="Total debits" value={formatAmount(debits, currency)} tone="neg" />
+          <SummaryCard label="Closing balance" value={lastWithBalance ? formatAmount(lastWithBalance.balance!, currency) : "—"} />
         </div>
 
         {/* Toolbar */}
@@ -236,6 +238,4 @@ function EditableCell({
   );
 }
 
-function fmt(n: number) {
-  return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
-}
+

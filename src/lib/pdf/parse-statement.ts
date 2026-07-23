@@ -1,6 +1,7 @@
 import { extractPdfText } from "./extract-text";
 import { parseTransactionsFromPages } from "./parse-transactions";
 import { detectBank, BANK_LABELS } from "./bank-detection";
+import { detectCurrency } from "./detect-currency";
 import type { ParsedStatement, Transaction } from "../statement-store";
 
 export async function parseStatementFile(
@@ -18,6 +19,7 @@ export async function parseStatementFile(
       fileSizeBytes: file.size,
       pageCount: 0,
       detectedBank: null,
+      currency: null,
       transactions: [],
       warnings: [
         `Couldn't read this PDF (${err instanceof Error ? err.message : "unknown error"}). ` +
@@ -31,6 +33,13 @@ export async function parseStatementFile(
   if (bankId === "unknown") {
     warnings.push(
       "Bank not recognized from statement text — used the generic layout parser. Double-check extracted rows before exporting."
+    );
+  }
+
+  const currency = detectCurrency(extracted.fullText, bankId === "unknown" ? null : bankId);
+  if (!currency) {
+    warnings.push(
+      "Couldn't detect this statement's currency — amounts are shown as plain numbers below. Double-check before exporting if that matters for your records."
     );
   }
 
@@ -65,6 +74,7 @@ export async function parseStatementFile(
     fileSizeBytes: file.size,
     pageCount: extracted.pageCount,
     detectedBank,
+    currency,
     transactions,
     warnings,
   };
