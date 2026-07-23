@@ -57,7 +57,6 @@ function PreviewPage() {
   return (
     <AppShell
       title="Preview & edit transactions"
-      step={2}
       toolbar={
         <Link
           to="/export"

@@ -64,7 +64,7 @@ function UploadPage() {
   const currentFile = pendingFiles[currentFileIndex];
 
   return (
-    <AppShell title="Convert statements" step={1}>
+    <AppShell title="Convert statements">
       <div className="mx-auto max-w-4xl space-y-6">
         {phase === "idle" && (
           <>

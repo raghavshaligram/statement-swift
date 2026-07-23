@@ -61,7 +61,6 @@ function ExportPage() {
   return (
     <AppShell
       title="Export"
-      step={3}
       toolbar={
         <Link
           to="/preview"
@@ -71,7 +70,7 @@ function ExportPage() {
         </Link>
       }
     >
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="space-y-6">
         <div className="rounded-lg border border-emerald/30 bg-emerald-soft/40 px-4 py-3 text-sm text-accent-foreground">
           <span className="inline-flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-emerald" />
@@ -79,100 +78,106 @@ function ExportPage() {
           </span>
         </div>
 
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Choose an export format
-          </h2>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {FORMATS.map((f) => {
-              const active = selected === f.key;
-              return (
-                <button
-                  key={f.key}
-                  onClick={() => setSelected(f.key)}
-                  className={`group relative rounded-xl border p-5 text-left transition ${
-                    active
-                      ? "border-emerald bg-emerald-soft/40 shadow-sm"
-                      : "border-border bg-card hover:border-emerald/50"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                      f.tone === "emerald" ? "bg-emerald text-primary-foreground" : "bg-surface-muted text-ink"
-                    }`}>
-                      <f.icon className="h-5 w-5" />
-                    </div>
-                    {active && (
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald text-primary-foreground">
-                        <Check className="h-3 w-3" />
+        {/* Format + options (left) / summary panel (right) side by side --
+            this pairing (not a stacked single column) is what the freed-up
+            width from removing the sidebar buys us. */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Choose an export format
+              </h2>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {FORMATS.map((f) => {
+                  const active = selected === f.key;
+                  return (
+                    <button
+                      key={f.key}
+                      onClick={() => setSelected(f.key)}
+                      className={`group relative rounded-xl border p-5 text-left transition ${
+                        active
+                          ? "border-emerald bg-emerald-soft/40 shadow-sm"
+                          : "border-border bg-card hover:border-emerald/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                          f.tone === "emerald" ? "bg-emerald text-primary-foreground" : "bg-surface-muted text-ink"
+                        }`}>
+                          <f.icon className="h-5 w-5" />
+                        </div>
+                        {active && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald text-primary-foreground">
+                            <Check className="h-3 w-3" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-base font-semibold text-ink">{f.name}</span>
-                    <span className="font-mono text-xs text-muted-foreground">{f.ext}</span>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{f.desc}</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                      <div className="mt-4 flex items-baseline gap-2">
+                        <span className="text-base font-semibold text-ink">{f.name}</span>
+                        <span className="font-mono text-xs text-muted-foreground">{f.ext}</span>
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{f.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Options + action */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
-            <div className="text-sm font-semibold text-ink">Export options</div>
-            <div className="mt-4 space-y-3 text-sm">
-              <Toggle
-                label="Include running balance column"
-                checked={options.includeBalance}
-                onChange={(v) => setOptions((o) => ({ ...o, includeBalance: v }))}
-              />
-              <Toggle
-                label="Split debit / credit into separate columns"
-                checked={options.splitDebitCredit}
-                onChange={(v) => setOptions((o) => ({ ...o, splitDebitCredit: v }))}
-              />
-              <Toggle
-                label="Normalize dates to ISO (YYYY-MM-DD)"
-                checked={options.normalizeDatesIso}
-                onChange={(v) => setOptions((o) => ({ ...o, normalizeDatesIso: v }))}
-              />
-              <Toggle
-                label="Include source-page reference column"
-                checked={options.includeSourcePage}
-                onChange={(v) => setOptions((o) => ({ ...o, includeSourcePage: v }))}
-              />
-              <Toggle
-                label="One sheet per statement (Excel only)"
-                checked={oneSheetPerStatement}
-                onChange={setOneSheetPerStatement}
-              />
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="text-sm font-semibold text-ink">Export options</div>
+              <div className="mt-4 space-y-3 text-sm">
+                <Toggle
+                  label="Include running balance column"
+                  checked={options.includeBalance}
+                  onChange={(v) => setOptions((o) => ({ ...o, includeBalance: v }))}
+                />
+                <Toggle
+                  label="Split debit / credit into separate columns"
+                  checked={options.splitDebitCredit}
+                  onChange={(v) => setOptions((o) => ({ ...o, splitDebitCredit: v }))}
+                />
+                <Toggle
+                  label="Normalize dates to ISO (YYYY-MM-DD)"
+                  checked={options.normalizeDatesIso}
+                  onChange={(v) => setOptions((o) => ({ ...o, normalizeDatesIso: v }))}
+                />
+                <Toggle
+                  label="Include source-page reference column"
+                  checked={options.includeSourcePage}
+                  onChange={(v) => setOptions((o) => ({ ...o, includeSourcePage: v }))}
+                />
+                <Toggle
+                  label="One sheet per statement (Excel only)"
+                  checked={oneSheetPerStatement}
+                  onChange={setOneSheetPerStatement}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-ink p-5 text-background">
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
-              Ready to export
-            </div>
-            <div className="mt-2 font-mono text-lg font-semibold">
-              {baseFileName}{FORMATS.find((f) => f.key === selected)?.ext}
-            </div>
-            <div className="mt-1 text-xs text-background/60">
-              <span className="font-mono">{rows.length}</span> transactions ·{" "}
-              <span className="font-mono">{statements.length}</span> statement{statements.length > 1 ? "s" : ""} ·{" "}
-              ~<span className="font-mono">{estimatedSizeKb}</span> KB
-            </div>
-            <button
-              onClick={handleDownload}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-emerald/90"
-            >
-              <Download className="h-4 w-4" />
-              {downloaded[selected] ? "Downloaded — click to re-download" : `Download ${FORMATS.find((f) => f.key === selected)?.name}`}
-            </button>
-            <div className="mt-3 text-center text-[11px] text-background/50">
-              Generated locally · nothing uploaded
+          <div className="lg:col-span-1">
+            <div className="rounded-xl border border-border bg-ink p-5 text-background">
+              <div className="text-xs font-semibold uppercase tracking-wider text-emerald">
+                Ready to export
+              </div>
+              <div className="mt-2 font-mono text-lg font-semibold">
+                {baseFileName}{FORMATS.find((f) => f.key === selected)?.ext}
+              </div>
+              <div className="mt-1 text-xs text-background/60">
+                <span className="font-mono">{rows.length}</span> transactions ·{" "}
+                <span className="font-mono">{statements.length}</span> statement{statements.length > 1 ? "s" : ""} ·{" "}
+                ~<span className="font-mono">{estimatedSizeKb}</span> KB
+              </div>
+              <button
+                onClick={handleDownload}
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-emerald/90"
+              >
+                <Download className="h-4 w-4" />
+                {downloaded[selected] ? "Downloaded — click to re-download" : `Download ${FORMATS.find((f) => f.key === selected)?.name}`}
+              </button>
+              <div className="mt-3 text-center text-[11px] text-background/50">
+                Generated locally · nothing uploaded
+              </div>
             </div>
           </div>
         </div>
