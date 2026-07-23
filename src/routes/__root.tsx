@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "LedgerLocal converts PDF bank statements into clean, editable Excel spreadsheets — 100% on-device. Works with Chase, ICICI, HDFC, Wells Fargo, and more.",
+          "LedgerLocal converts PDF bank statements into clean, editable Excel spreadsheets — 100% on-device. Works with major banks across the US, UK, Canada, and India, and more.",
       },
       { name: "author", content: "LedgerLocal" },
       { property: "og:title", content: "LedgerLocal — Bank Statement to Excel Software" },

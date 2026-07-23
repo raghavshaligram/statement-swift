@@ -17,7 +17,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Which banks and formats are supported?",
-    a: "Named detection for Chase, Bank of America, Wells Fargo, ICICI, HDFC, and SBI, plus a generic layout parser for any other bank's text-based PDF statement. Export to Excel, CSV, Tally XML, OFX, QIF, or QBO.",
+    a: "Named detection for 20+ major banks across the US, UK, Canada, and India — including Chase, Bank of America, Citibank, Barclays, HSBC, RBC, ICICI, HDFC, and more — plus a generic layout parser for any other bank's text-based PDF statement. Export to Excel, CSV, Tally XML, OFX, QIF, or QBO.",
   },
   {
     q: "Does it work with scanned PDFs?",

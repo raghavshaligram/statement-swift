@@ -63,8 +63,8 @@ function Landing() {
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 Drop a PDF below and watch your transactions appear — parsed entirely in your
-                browser, in seconds. No signup, no upload, works with banks in the US, India, UK
-                and beyond.
+                browser, in seconds. No signup, no upload, works with banks in the US, UK, Canada,
+                India and beyond.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
                 <TrustPill icon={Check} label="No signup required" />
