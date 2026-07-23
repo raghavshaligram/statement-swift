@@ -78,7 +78,8 @@ async function loadPdfJsForOcr() {
  */
 export async function ocrPdfToTextItems(
   file: File,
-  onProgress?: (e: OcrProgressEvent) => void
+  onProgress?: (e: OcrProgressEvent) => void,
+  languages: string[] = ["eng"]
 ): Promise<{ pageCount: number; pages: Array<{ pageNumber: number; items: TextItem[]; rawText: string }> }> {
   if (typeof window === "undefined") {
     throw new Error("ocrPdfToTextItems can only run in the browser");
@@ -86,6 +87,13 @@ export async function ocrPdfToTextItems(
 
   const pdfjsLib = await loadPdfJsForOcr();
   const tesseract = await import("tesseract.js");
+  const { toTesseractLang } = await import("./ocr-languages");
+  const langArg = toTesseractLang(languages);
+  // Only English is self-hosted (see the module comment in ocr-languages.ts
+  // for why every other language isn't) -- use our local assets when English
+  // is the only language requested, and fall back to tesseract.js's default
+  // CDN-based loading for anything else, exactly like PDFMacro does.
+  const useSelfHostedLang = languages.length === 1 && languages[0] === "eng";
 
   const arrayBuffer = await file.arrayBuffer();
   const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -100,20 +108,15 @@ export async function ocrPdfToTextItems(
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const workers = await Promise.all(
     Array.from({ length: poolSize }, () =>
-      tesseract.createWorker("eng", 1, {
-        // Self-host the worker script, WASM core, and English language pack
-        // rather than depending on tesseract.js's default public CDN --
-        // more consistent with the on-device positioning, and avoids a
-        // runtime dependency on an external CDN being reachable. The
-        // language pack is available as a plain npm package
-        // (@tesseract.js-data/eng), so self-hosting it costs nothing beyond
-        // the ~11MB asset itself, downloaded once and cached by the browser.
-        // Absolute URLs are required here (not relative paths) -- the WASM
-        // loader resolves corePath from inside its own worker context,
-        // where a bare relative path fails to resolve.
+      tesseract.createWorker(langArg, 1, {
+        // Worker script + WASM core are always self-hosted -- these are the
+        // OCR engine itself, not language-specific, so this covers every
+        // language regardless of which one is requested. Only English's
+        // language *data* is self-hosted (see the note above langArg);
+        // everything else uses tesseract.js's default CDN langPath.
         workerPath: `${origin}/tesseract/worker.min.js`,
         corePath: `${origin}/tesseract/tesseract-core-simd-lstm.js`,
-        langPath: `${origin}/tesseract`,
+        ...(useSelfHostedLang ? { langPath: `${origin}/tesseract` } : {}),
         workerBlobURL: false,
       })
     )

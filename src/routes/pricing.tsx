@@ -20,7 +20,7 @@ export const Route = createFileRoute("/pricing")({
 
 const FREE = [
   ["Unlimited conversions", true],
-  ["Up to 20 pages per statement", true],
+  ["Up to 10 pages per statement", true],
   ["Excel (.xlsx) and CSV export", true],
   ["Named bank detection + generic parser for any bank", true],
   ["On-device processing", true],

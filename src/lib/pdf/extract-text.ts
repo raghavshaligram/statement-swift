@@ -87,3 +87,19 @@ export async function extractPdfText(
 
   return { pageCount: doc.numPages, pages, fullText };
 }
+
+/**
+ * Cheap page-count check -- loads just enough of the PDF to read its page
+ * count, without extracting any text. Used for the free-tier page-limit
+ * check before committing to a full parse, so a too-long file gets rejected
+ * immediately rather than after doing real work on it.
+ */
+export async function getPdfPageCount(file: File): Promise<number> {
+  if (typeof window === "undefined") {
+    throw new Error("getPdfPageCount can only run in the browser");
+  }
+  const pdfjsLib = await loadPdfJs();
+  const arrayBuffer = await file.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  return doc.numPages;
+}

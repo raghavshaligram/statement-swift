@@ -279,7 +279,7 @@ function Landing() {
                   <span className="text-sm text-muted-foreground">no signup required</span>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  A handful of conversions a month, up to 20 pages per statement. Excel and CSV export.
+                  Unlimited conversions, up to 10 pages per statement. Excel and CSV export.
                 </p>
               </div>
             </ScrollRevealItem>

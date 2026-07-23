@@ -1,10 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FileText, X, ShieldCheck, Loader2, Check, AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { StatementDropzone } from "@/components/statement-dropzone";
 import { useStatementStore } from "@/lib/statement-store";
 import { parseStatementFile } from "@/lib/pdf/parse-statement";
+import { getPdfPageCount } from "@/lib/pdf/extract-text";
+import { FREE_TIER_MAX_PAGES } from "@/lib/pricing-constants";
+import { OCR_LANGUAGES } from "@/lib/pdf/ocr-languages";
 
 export const Route = createFileRoute("/upload")({
   head: () => ({
@@ -21,6 +24,8 @@ export const Route = createFileRoute("/upload")({
 function UploadPage() {
   const nav = useNavigate();
   const [liveLabel, setLiveLabel] = useState<string>("");
+  const [pageLimitError, setPageLimitError] = useState<string | null>(null);
+  const [ocrLanguage, setOcrLanguage] = useState<string>("eng");
 
   const pendingFiles = useStatementStore((s) => s.pendingFiles);
   const setPendingFiles = useStatementStore((s) => s.setPendingFiles);
@@ -42,6 +47,24 @@ function UploadPage() {
 
   async function startConversion() {
     if (!pendingFiles.length) return;
+    setPageLimitError(null);
+
+    // Free-tier page-per-statement check, before any real parsing work
+    // starts. There's no accounts system yet, so this is currently a
+    // blanket limit (see pricing-constants.ts) -- everyone gets the free
+    // limit until real Pro accounts exist to bypass it.
+    const pageCounts = await Promise.all(
+      pendingFiles.map(async (f) => ({ file: f, pages: await getPdfPageCount(f) }))
+    );
+    const tooLong = pageCounts.filter((p) => p.pages > FREE_TIER_MAX_PAGES);
+    if (tooLong.length > 0) {
+      const names = tooLong.map((t) => `${t.file.name} (${t.pages} pages)`).join(", ");
+      setPageLimitError(
+        `${names} ${tooLong.length > 1 ? "exceed" : "exceeds"} the ${FREE_TIER_MAX_PAGES}-page free limit. Sign up for Pro to convert longer statements, or remove ${tooLong.length > 1 ? "these files" : "this file"} and try again.`
+      );
+      return;
+    }
+
     startProcessing();
 
     const statements = [];
@@ -49,9 +72,13 @@ function UploadPage() {
       for (let i = 0; i < pendingFiles.length; i++) {
         const file = pendingFiles[i];
         setLiveLabel(file.name);
-        const statement = await parseStatementFile(file, (page, total) => {
-          setProgress(i, page, total);
-        });
+        const statement = await parseStatementFile(
+          file,
+          (page, total) => {
+            setProgress(i, page, total);
+          },
+          [ocrLanguage]
+        );
         statements.push(statement);
       }
       finishProcessing(statements);
@@ -105,6 +132,32 @@ function UploadPage() {
                     </li>
                   ))}
                 </ul>
+                <div className="mx-4 mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+                  <label htmlFor="ocr-language">If this turns out to be a scanned statement, read it as:</label>
+                  <select
+                    id="ocr-language"
+                    value={ocrLanguage}
+                    onChange={(e) => setOcrLanguage(e.target.value)}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-ink"
+                  >
+                    {OCR_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {pageLimitError && (
+                  <div className="mx-4 mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                    <div className="flex-1 text-sm text-amber-900">
+                      {pageLimitError}
+                      <Link to="/pricing" className="ml-2 font-semibold text-amber-900 underline hover:no-underline">
+                        See Pro plans →
+                      </Link>
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-end border-t border-border p-4">
                   <button
                     onClick={startConversion}

@@ -9,7 +9,8 @@ import type { ParsedStatement, Transaction } from "../statement-store";
 
 export async function parseStatementFile(
   file: File,
-  onPageParsed?: (pageNumber: number, totalPages: number) => void
+  onPageParsed?: (pageNumber: number, totalPages: number) => void,
+  ocrLanguages: string[] = ["eng"]
 ): Promise<ParsedStatement> {
   const warnings: string[] = [];
 
@@ -42,7 +43,7 @@ export async function parseStatementFile(
   let usedOcr = false;
   if (looksScanned) {
     try {
-      const ocrResult = await ocrPdfToTextItems(file, (e) => onPageParsed?.(e.sourcePage, e.totalPages));
+      const ocrResult = await ocrPdfToTextItems(file, (e) => onPageParsed?.(e.sourcePage, e.totalPages), ocrLanguages);
       const ocrPages: PageText[] = ocrResult.pages.map((p) => ({
         pageNumber: p.pageNumber,
         items: p.items,
