@@ -22,21 +22,17 @@ const FREE = [
   ["5 conversions per month", true],
   ["Up to 20 pages per statement", true],
   ["Excel (.xlsx) and CSV export", true],
-  ["All 400+ supported banks", true],
+  ["Named bank detection + generic parser for any bank", true],
   ["On-device processing", true],
   ["Tally XML, OFX, QIF, QBO", false],
-  ["OCR for scanned statements", false],
-  ["Bank rules & auto-categorization", false],
 ] as const;
 
 const PRO = [
   ["Unlimited conversions", true],
   ["Unlimited pages per statement", true],
   ["All six export formats", true],
-  ["All 400+ supported banks", true],
+  ["Named bank detection + generic parser for any bank", true],
   ["On-device processing", true],
-  ["OCR for scanned statements", true],
-  ["Bank rules & auto-categorization", true],
   ["Priority parser requests", true],
 ] as const;
 
