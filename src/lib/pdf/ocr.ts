@@ -1,0 +1,187 @@
+/**
+ * On-device OCR for scanned/image-only PDF statements. Adapted from
+ * PDFMacro's ocrPdfToTokens (raghavshaligram/counsel-s-lovable,
+ * src/lib/pdf/ocr-pdf.ts) -- that implementation is mature and
+ * production-tested (worker pool, per-page skip-if-already-has-text,
+ * offscreen canvas), so this ports the same approach rather than
+ * reinventing it, trimmed down to just what LedgerLocal needs: word-level
+ * text + position, not PDFMacro's fuller "rebuild a searchable PDF" output
+ * (which needs pdf-lib and isn't relevant here -- we only need tokens to
+ * feed into the existing transaction-parsing pipeline).
+ *
+ * Runs entirely in the browser via tesseract.js -- no server, same
+ * on-device guarantee as the rest of the app.
+ */
+
+import type { TextItem } from "./extract-text";
+
+export type OcrStage = "loading-language" | "rendering" | "ocr";
+
+export type OcrProgressEvent = {
+  sourcePage: number;
+  totalPages: number;
+  stage: OcrStage;
+  message: string;
+};
+
+type OcrWord = { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } };
+
+const RENDER_SCALE = 1.5; // ~108dpi -- good balance of OCR accuracy vs. speed/memory for clean bank-statement scans
+
+function collectWords(data: unknown): OcrWord[] {
+  const out: OcrWord[] = [];
+  const visit = (node: Record<string, unknown> | null | undefined) => {
+    if (!node) return;
+    const words = node.words as OcrWord[] | undefined;
+    if (Array.isArray(words)) out.push(...words);
+    for (const key of ["blocks", "paragraphs", "lines"]) {
+      const arr = node[key] as Record<string, unknown>[] | undefined;
+      if (Array.isArray(arr)) arr.forEach(visit);
+    }
+  };
+  visit(data as Record<string, unknown>);
+  return out.filter((w) => w.text && w.text.trim().length > 0);
+}
+
+function makeCanvas(w: number, h: number): HTMLCanvasElement | OffscreenCanvas {
+  if (typeof OffscreenCanvas !== "undefined") {
+    try {
+      return new OffscreenCanvas(w, h);
+    } catch {
+      // fall through to a regular canvas element
+    }
+  }
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+
+let pdfjsLibPromise: Promise<typeof import("pdfjs-dist")> | null = null;
+async function loadPdfJsForOcr() {
+  if (!pdfjsLibPromise) {
+    pdfjsLibPromise = import("pdfjs-dist").then(async (lib) => {
+      const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+      lib.GlobalWorkerOptions.workerSrc = workerUrl;
+      return lib;
+    });
+  }
+  return pdfjsLibPromise;
+}
+
+/**
+ * OCRs every page of a PDF and returns text items in the same shape as
+ * extract-text.ts's normal pdf.js extraction (top-left origin x/y/width/
+ * height), so the result can feed directly into the existing
+ * parseTransactionsFromPages pipeline unchanged -- OCR is just an
+ * alternate source of TextItems, not a different parsing path.
+ */
+export async function ocrPdfToTextItems(
+  file: File,
+  onProgress?: (e: OcrProgressEvent) => void
+): Promise<{ pageCount: number; pages: Array<{ pageNumber: number; items: TextItem[]; rawText: string }> }> {
+  if (typeof window === "undefined") {
+    throw new Error("ocrPdfToTextItems can only run in the browser");
+  }
+
+  const pdfjsLib = await loadPdfJsForOcr();
+  const tesseract = await import("tesseract.js");
+
+  const arrayBuffer = await file.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const totalPages = doc.numPages;
+
+  onProgress?.({ sourcePage: 0, totalPages, stage: "loading-language", message: "Loading OCR language pack…" });
+
+  // A small worker pool so multi-page scanned statements OCR in parallel
+  // rather than one page at a time -- matters a lot on a 20+ page statement.
+  const hw = typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 2 : 2;
+  const poolSize = Math.max(1, Math.min(4, Math.floor(hw / 2)));
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const workers = await Promise.all(
+    Array.from({ length: poolSize }, () =>
+      tesseract.createWorker("eng", 1, {
+        // Self-host the worker script, WASM core, and English language pack
+        // rather than depending on tesseract.js's default public CDN --
+        // more consistent with the on-device positioning, and avoids a
+        // runtime dependency on an external CDN being reachable. The
+        // language pack is available as a plain npm package
+        // (@tesseract.js-data/eng), so self-hosting it costs nothing beyond
+        // the ~11MB asset itself, downloaded once and cached by the browser.
+        // Absolute URLs are required here (not relative paths) -- the WASM
+        // loader resolves corePath from inside its own worker context,
+        // where a bare relative path fails to resolve.
+        workerPath: `${origin}/tesseract/worker.min.js`,
+        corePath: `${origin}/tesseract/tesseract-core-simd-lstm.js`,
+        langPath: `${origin}/tesseract`,
+        workerBlobURL: false,
+      })
+    )
+  );
+  const idleWorkers = [...workers];
+  const waiters: Array<(w: (typeof workers)[number]) => void> = [];
+  const acquire = (): Promise<(typeof workers)[number]> =>
+    new Promise((res) => {
+      const w = idleWorkers.pop();
+      if (w) return res(w);
+      waiters.push(res);
+    });
+  const release = (w: (typeof workers)[number]) => {
+    const next = waiters.shift();
+    if (next) next(w);
+    else idleWorkers.push(w);
+  };
+
+  const pages: Array<{ pageNumber: number; items: TextItem[]; rawText: string }> = new Array(totalPages);
+
+  try {
+    await Promise.all(
+      Array.from({ length: totalPages }, async (_, i) => {
+        const pageNumber = i + 1;
+        const page = await doc.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: RENDER_SCALE });
+        const canvas = makeCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+        if (!ctx) throw new Error("Canvas 2D context unavailable");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        onProgress?.({ sourcePage: pageNumber, totalPages, stage: "rendering", message: `Rendering page ${pageNumber}…` });
+        await page.render({ canvasContext: ctx as CanvasRenderingContext2D, viewport, canvas: canvas as HTMLCanvasElement }).promise;
+
+        const worker = await acquire();
+        let words: OcrWord[] = [];
+        try {
+          onProgress?.({ sourcePage: pageNumber, totalPages, stage: "ocr", message: `Reading page ${pageNumber} (OCR)…` });
+          const { data } = await worker.recognize(canvas as HTMLCanvasElement, {}, { blocks: true });
+          words = collectWords(data);
+        } finally {
+          release(worker);
+        }
+
+        const inv = 1 / RENDER_SCALE;
+        const items: TextItem[] = [];
+        for (const w of words) {
+          const text = w.text.replace(/\s+/g, " ").trim();
+          if (!text) continue;
+          const width = (w.bbox.x1 - w.bbox.x0) * inv;
+          const height = (w.bbox.y1 - w.bbox.y0) * inv;
+          if (width <= 0 || height <= 0) continue;
+          items.push({ str: text, x: w.bbox.x0 * inv, y: w.bbox.y0 * inv, width, height });
+        }
+        const rawText = items.map((it) => it.str).join(" ");
+        pages[i] = { pageNumber, items, rawText };
+      })
+    );
+  } finally {
+    await Promise.all(workers.map((w) => w.terminate().catch(() => undefined)));
+  }
+
+  return { pageCount: totalPages, pages };
+}
+
+/** Quick check (no OCR run yet) for whether a page's real text layer is too sparse to trust -- the same threshold PDFMacro uses for its "already has text, skip OCR" decision, applied in reverse (decide whether to bother running OCR at all). */
+export function looksLikeScannedPage(itemCount: number): boolean {
+  const MIN_TEXT_ITEMS = 12;
+  return itemCount < MIN_TEXT_ITEMS;
+}

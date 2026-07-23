@@ -1,7 +1,7 @@
 /**
  * Section 9: FAQ. Categories match the design brief; answers are written to
- * be truthful about LedgerLocal's current feature set — no OCR/scanned-PDF
- * claims, no capabilities that aren't actually built.
+ * be truthful about LedgerLocal's current feature set — no capability
+ * claims beyond what's actually built and tested.
  */
 import { Link } from "@tanstack/react-router";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/scroll-reveal";
@@ -21,7 +21,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Does it work with scanned PDFs?",
-    a: "Not yet. LedgerLocal currently reads text-based PDF statements — the kind your bank generates directly, where the text can be selected and copied. Scanned or photographed statements need OCR, which isn't built yet.",
+    a: "Yes. If your statement is scanned or photographed, LedgerLocal automatically falls back to on-device OCR to read it — no upload, same as everything else. It's slower than reading a real text layer, and less precise, so double-check extracted rows before exporting.",
   },
   {
     q: "Can I import into QuickBooks?",
